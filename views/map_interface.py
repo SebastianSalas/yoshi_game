@@ -7,14 +7,14 @@ class mainInterface(tk.Tk):
   global matriz
 
   matriz = np.array([
-    [0, 0, 0, 1, 1, 0, 0, 0],
-    [0, 1, 0, 1, 1, 0, 1, 1],
-    [0, 1, 0, 2, 0, 0, 0, 0],
-    [0, 1, 0, 1, 1, 1, 1, 1],
-    [5, 0, 0, 6, 4, 0, 0, 1],
-    [0, 1, 1, 1, 1, 1, 0, 1],
-    [3, 0, 0, 0, 2, 0, 0, 1],
-    [0, 1, 0, 1, 1, 1, 1, 1]])
+    [1, 1, 0, 0, 0, 0, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 2, 2, 0, 0, 0],
+    [0, 0, 0, 2, 2, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 0, 0, 0, 0, 1, 1]])
 
   def __init__(self):
 
@@ -48,7 +48,7 @@ class mainInterface(tk.Tk):
     self.canvas_matriz = tk.Canvas(self.left_frame, bg="white", bd=2, relief="solid", highlightbackground="#8EEA6F")
     self.canvas_matriz.pack(expand=True, fill="both")
 
-    #self.canvas_matriz.bind("<Configure>", self.dibujar_matriz)
+    self.canvas_matriz.bind("<Configure>", self.dibujar_matriz)
 
     # Canvas en el contenedor derecho
     self.right_canvas = tk.Canvas(self.right_frame, bg="white", bd=2, relief="solid", highlightbackground="#8EEA6F")
@@ -75,6 +75,54 @@ class mainInterface(tk.Tk):
   def right_canvas_resize(self, event):
     self.photo = self.resize_first_image(Image.open("resources/images/yoshigame.png"), (self.right_canvas.winfo_width(), round(self.right_canvas.winfo_height() * 0.4)))
     self.first_label.config(image=self.photo)
+
+  def dibujar_matriz(self, event):
+
+    # Eliminar dibujos anteriores
+    self.canvas_matriz.delete("all")
+    if hasattr(self, 'label_agent_icon') and self.label_agent_icon:self.label_agent_icon.destroy()
+    # Número de filas y columnas en la matriz
+    rows = 8
+    columns = 8
+    # Tamaño de cada rectángulo en el Canvas
+    rectangle_width = self.canvas_matriz.winfo_width() // columns
+    rectangle_height = self.canvas_matriz.winfo_height() // rows
+
+    for row in range(rows):
+      for column in range(columns):
+
+        # Calcular coordenadas de la celda
+        x1 = column * rectangle_width # Esquina superior izquierda 
+        y1 = row * rectangle_height # Esquina superior izquierda
+        x2 = x1 + rectangle_width # Esquina inferior derecha
+        y2 = y1 + rectangle_height # Esquina inferior derecha
+        x_center, y_center = (x1 + x2) // 2, (y1 + y2) // 2
+
+        # Color y texto para el rectángulo
+        color = "white"
+        image_path = None
+        if matriz[row][column] == 0: # Casilla libre
+          pass
+        elif matriz[row][column] == 1: # Casilla con estrella simple
+          color = "#4F80BD"
+
+        elif matriz[row][column] == 2: # Casilla con estrella especial
+          color = "#4F80BD"
+          image_path = "resources/images/basic_Coin.gif"
+        elif matriz[row][column] == 5: # Punto de inicio
+          image_path = "resources/images/fire_truck.png"
+          
+          if (x1 == 0 and y1 != 0): # Posición cuando X=0 y Y!=0
+            self.label_agent_icon.place(x = x1 + (rectangle_width * 0.15), y = y1 + round(y1 ** 0.35))
+          elif (x1 != 0 and y1 == 0): # Posición cuando X!=0 y Y=0
+            self.label_agent_icon.place(x = x1 + (rectangle_width * 0.15), y = y1 + round(rectangle_height ** 0.55))
+          elif (x1 == 0 and y1 == 0): # Posición cuando X=0 y Y=0
+            self.label_agent_icon.place(x=x1 + (rectangle_width * 0.15), y=y1 + round(rectangle_height ** 0.55))
+          else: # Posición en cualquier otro caso
+            self.label_agent_icon.place(x=x1 + round(x1 ** 0.35), y=y1 + round(y1 ** 0.35))
+
+        # Dibujar rectángulos en el Canvas
+        self.canvas_matriz.create_rectangle(x1, y1, x2, y2, fill=color, outline="black")
 
 # Método principal
 if __name__ == "__main__":
