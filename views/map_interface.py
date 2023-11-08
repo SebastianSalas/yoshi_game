@@ -1,5 +1,6 @@
 import tkinter as tk
 import numpy as np
+import uuid
 from PIL import Image, ImageTk
 
 class mainInterface(tk.Tk):
@@ -10,9 +11,9 @@ class mainInterface(tk.Tk):
     [1, 1, 0, 0, 0, 0, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 1],
     [0, 0, 0, 0, 0, 0, 0, 0],
+    [3, 0, 0, 2, 2, 0, 0, 0],
     [0, 0, 0, 2, 2, 0, 0, 0],
-    [0, 0, 0, 2, 2, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 4, 0, 0],
     [1, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 0, 0, 0, 0, 1, 1]])
 
@@ -105,10 +106,16 @@ class mainInterface(tk.Tk):
           pass
         elif matriz[row][column] == 1: # Casilla con estrella simple
           color = "#4F80BD"
-
+          image_path = "resources/images/basic_Coin.gif"
         elif matriz[row][column] == 2: # Casilla con estrella especial
           color = "#4F80BD"
-          image_path = "resources/images/basic_Coin.gif"
+          image_path = "resources/images/star_Coin.gif"
+        elif matriz[row][column] == 3: # Casilla con Yoshi verde
+          color = "#4F80BD"
+          image_path = "resources/images/yoshi_Green.png"
+        elif matriz[row][column] == 4: # Casilla con Yoshi rojo
+          color = "#4F80BD"
+          image_path = "resources/images/yoshi_Red.png"
         elif matriz[row][column] == 5: # Punto de inicio
           image_path = "resources/images/fire_truck.png"
           
@@ -123,6 +130,12 @@ class mainInterface(tk.Tk):
 
         # Dibujar rectángulos en el Canvas
         self.canvas_matriz.create_rectangle(x1, y1, x2, y2, fill=color, outline="black")
+
+        if image_path:
+          unique_id = str(uuid.uuid4())  # Generar un identificador único
+          image = ImageTk.PhotoImage(Image.open(image_path).resize((round(rectangle_width * 0.9), round(rectangle_height * 0.9)), Image.LANCZOS))
+          self.image_dict[unique_id] = image  # Almacenar la imagen en el diccionario
+          self.canvas_matriz.create_image(x_center, y_center, anchor=tk.CENTER, image=image)
 
 # Método principal
 if __name__ == "__main__":
