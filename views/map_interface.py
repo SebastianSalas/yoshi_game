@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 import numpy as np
 import uuid
@@ -68,6 +69,21 @@ class mainInterface(tk.Tk):
     self.title_label.config(bg="white")
     self.title_label.pack(pady="5", padx="10", fill="x")
 
+    # Etiqueta de selección de dificultad
+    self.select_difficulty_label = tk.Label(self.right_canvas, text="Seleccione la dificultad de juego:", fg="black", font=("Helvetica", 12), anchor="w", justify="left")
+    self.select_difficulty_label.config(bg="white")
+    self.select_difficulty_label.pack(pady="5", padx="10", fill="x")
+
+    # Selector de dificultad
+    difficulty_options = ["Seleccionar...", "Principiante", "Intermedio", "Experto"]
+    selected_difficulty = tk.StringVar(self)
+    selected_difficulty.set(difficulty_options[0])
+    select_difficulty = tk.OptionMenu(self.right_canvas, selected_difficulty, *difficulty_options)
+    select_difficulty.pack(padx="10", fill="x")
+    select_difficulty.config(font=('Helvetica', 11), bg="#8EEA6F", fg="black")
+
+    
+
   # Cálculo de las dimensiones que tendrá la imagen principal de Yoshi
   def resize_first_image(self, image, size):
     return ImageTk.PhotoImage(image.resize(size, Image.LANCZOS))
@@ -110,11 +126,9 @@ class mainInterface(tk.Tk):
         elif matriz[row][column] == 2: # Casilla con estrella especial
           color = "#4F80BD"
           image_path = "resources/images/star_Coin.gif"
-        elif matriz[row][column] == 3: # Casilla con Yoshi verde
-          color = "#4F80BD"
+        elif matriz[row][column] == 3: # Casilla con Yoshi verde operado por el computador
           image_path = "resources/images/yoshi_Green.png"
-        elif matriz[row][column] == 4: # Casilla con Yoshi rojo
-          color = "#4F80BD"
+        elif matriz[row][column] == 4: # Casilla con Yoshi rojo operado por el jugador
           image_path = "resources/images/yoshi_Red.png"
         elif matriz[row][column] == 5: # Punto de inicio
           image_path = "resources/images/fire_truck.png"
@@ -141,4 +155,4 @@ class mainInterface(tk.Tk):
 if __name__ == "__main__":
   app = mainInterface()
   app.mainloop()
-  #os.system('cls') # Limpia la terminal
+  os.system('cls') # Limpia la terminal
