@@ -70,19 +70,85 @@ class mainInterface(tk.Tk):
     self.title_label.pack(pady="5", padx="10", fill="x")
 
     # Etiqueta de selección de dificultad
-    self.select_difficulty_label = tk.Label(self.right_canvas, text="Seleccione la dificultad de juego:", fg="black", font=("Helvetica", 12), anchor="w", justify="left")
-    self.select_difficulty_label.config(bg="white")
-    self.select_difficulty_label.pack(pady="5", padx="10", fill="x")
+    self.score_label = tk.Label(self.right_canvas, text="Seleccione la dificultad de juego:", fg="black", font=("Helvetica", 12), anchor="w", justify="left")
+    self.score_label.config(bg="white")
+    self.score_label.pack(pady="5", padx="10", fill="x")
 
     # Selector de dificultad
     difficulty_options = ["Seleccionar...", "Principiante", "Intermedio", "Experto"]
     selected_difficulty = tk.StringVar(self)
     selected_difficulty.set(difficulty_options[0])
     select_difficulty = tk.OptionMenu(self.right_canvas, selected_difficulty, *difficulty_options)
-    select_difficulty.pack(padx="10", fill="x")
     select_difficulty.config(font=('Helvetica', 11), bg="#8EEA6F", fg="black")
+    select_difficulty.pack(padx="10", fill="x")
 
-    
+    # Etiqueta de selección de próximo movimiento
+    self.select_movement_label = tk.Label(self.right_canvas, text="Seleccione el algoritmo:", fg="black", font=("Helvetica", 12), anchor="w", justify="left")
+    self.select_movement_label.config(bg="white")
+    self.select_movement_label.pack(pady="5", padx="10", fill="x")
+
+    # Selector del próximo movimiento
+    movements_options = ["Seleccionar...", "Superior-Izquierdo", "Superior-Derecho", "Inferior-Izquierdo", "Inferior derecho"]
+    selected_movement = tk.StringVar(self.right_canvas)
+    selected_movement.set(movements_options[0])
+    movements_menu = tk.OptionMenu(self.right_canvas, selected_movement, *movements_options)
+    movements_menu.config(font=('Helvetica', 11), bg="#8EEA6F", fg="black")
+    movements_menu.pack(padx="10", fill="x")
+
+    # Crear un frame para contener las puntuaciones
+    self.score_frame = tk.Frame(self.right_canvas, bg="white")
+    self.score_frame.pack(fill="x", padx=10, pady=10)
+
+    # Etiqueta de puntuaciones
+    self.score_label = tk.Label(self.score_frame, text="Puntuación:", fg="black", font=("Helvetica", 12), anchor="w", justify="left")
+    self.score_label.config(bg="white")
+    self.score_label.grid(row=0, column=0, pady=5, padx=0, sticky="w")
+
+    # Etiqueta de puntuación de la máquina
+    self.green_score_label = tk.Label(self.score_frame, text="Máquina", fg="#8EEA6F", font=("Helvetica", 12), anchor="w", justify="left")
+    self.green_score_label.config(bg="white")
+    self.green_score_label.grid(row=0, column=1, pady=0, padx=10, sticky="w")
+
+    # Etiqueta de puntuación del jugador
+    self.red_score_label = tk.Label(self.score_frame, text="Jugador", fg="red", font=("Helvetica", 12), anchor="w", justify="left")
+    self.red_score_label.config(bg="white")
+    self.red_score_label.grid(row=0, column=2, pady=0, padx=10, sticky="w")
+
+    # Crear un frame para contener los botones inferiores
+    self.buttons_frame = tk.Frame(self.right_canvas, bg="white")
+    self.buttons_frame.pack(side=tk.BOTTOM, fill="x", padx=10, pady=10)
+
+    # Función del botón de inicio del algoritmo
+    def start_algorithm():
+      # Bloquear el uso del selector de dificultad
+      selected_difficulty.trace_add("write", select_difficulty.config(state=tk.DISABLED))
+
+    # Botón para iniciar la partida
+    start_button = tk.Button(self.buttons_frame, text="Iniciar", bg="#8EEA6F", fg="black", command=start_algorithm)
+    start_button.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
+    start_button.config(font=('Helvetica', 12))
+
+    # Función para reiniciar la partida
+    def restart():
+      selected_difficulty.trace_add("write", select_difficulty.config(state=tk.ACTIVE))
+
+    # Botón para reiniciar la partida
+    restart_button = tk.Button(self.buttons_frame, text="Reiniciar", bg="#8EEA6F", fg="black", command=restart)
+    restart_button.grid(row=0, column=1, sticky="ew", padx=5, pady=5)
+    restart_button.config(font=('Helvetica', 12))
+
+    # Crear ventana con los créditos
+    def credits():
+      pass
+
+    # Botón de créditos
+    credits_button = tk.Button(self.buttons_frame, text="Créditos", bg="#8EEA6F", fg="black", command=credits)
+    credits_button.grid(row=1, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
+    credits_button.config(font=('Helvetica', 12))
+
+    # Distribuir uniformemente el espacio en X entre los botones
+    self.buttons_frame.columnconfigure(0, weight=1)
+    self.buttons_frame.columnconfigure(1, weight=1)
 
   # Cálculo de las dimensiones que tendrá la imagen principal de Yoshi
   def resize_first_image(self, image, size):
