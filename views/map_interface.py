@@ -12,11 +12,20 @@ class mainInterface(tk.Tk):
     [1, 1, 0, 0, 0, 0, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 1],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [3, 0, 0, 2, 2, 0, 0, 0],
     [0, 0, 0, 2, 2, 0, 0, 0],
-    [0, 0, 0, 0, 0, 4, 0, 0],
+    [0, 0, 0, 2, 2, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
     [1, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 0, 0, 0, 0, 1, 1]])
+  
+  #First yoshi
+  zeros = np.argwhere(matriz == 0)
+  random_pos = zeros[np.random.choice(len(zeros))]
+  matriz[random_pos[0], random_pos[1]] = 3
+  #Second yoshi
+  zeros = np.delete(zeros, np.where((zeros == random_pos).all(axis=1)), axis=0)
+  random_pos = zeros[np.random.choice(len(zeros))]
+  matriz[random_pos[0], random_pos[1]] = 4
 
   def __init__(self):
 
