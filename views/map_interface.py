@@ -103,6 +103,7 @@ class mainInterface(tk.Tk):
     movements_menu = tk.OptionMenu(self.right_canvas, selected_movement, *movements_options)
     movements_menu.config(font=('Helvetica', 11), bg="#8EEA6F", fg="black")
     movements_menu.pack(padx="10", fill="x")
+    movements_menu.config(state=tk.DISABLED)
 
     # Crear un frame para contener las puntuaciones
     self.score_frame = tk.Frame(self.right_canvas, bg="white")
@@ -129,8 +130,14 @@ class mainInterface(tk.Tk):
 
     # Función del botón de inicio del algoritmo
     def start_algorithm():
-      # Bloquear el uso del selector de dificultad
-      selected_difficulty.trace_add("write", select_difficulty.config(state=tk.DISABLED))
+      if (selected_difficulty.get() != "Seleccionar..."):
+        # Bloquear el uso del botón de inicio
+        start_button.config(state=tk.DISABLED)
+        # Bloquear el uso del selector de dificultad
+        select_difficulty.config(state=tk.DISABLED)
+        # Activar el selector de movimiento
+        movements_menu.config(state=tk.ACTIVE)
+
 
     # Botón para iniciar la partida
     start_button = tk.Button(self.buttons_frame, text="Iniciar", bg="#8EEA6F", fg="black", command=start_algorithm)
@@ -139,8 +146,11 @@ class mainInterface(tk.Tk):
 
     # Función para reiniciar la partida
     def restart():
-      selected_difficulty.trace_add("write", select_difficulty.config(state=tk.ACTIVE))
-
+      start_button.config(state=tk.ACTIVE)
+      select_difficulty.config(state=tk.ACTIVE)
+      movements_menu.config(state=tk.DISABLED)
+      selected_difficulty.set(difficulty_options[0])
+      selected_movement.set(movements_options[0])
     # Botón para reiniciar la partida
     restart_button = tk.Button(self.buttons_frame, text="Reiniciar", bg="#8EEA6F", fg="black", command=restart)
     restart_button.grid(row=0, column=1, sticky="ew", padx=5, pady=5)
@@ -230,4 +240,4 @@ class mainInterface(tk.Tk):
 if __name__ == "__main__":
   app = mainInterface()
   app.mainloop()
-  os.system('cls') # Limpia la terminal
+  #os.system('cls') # Limpia la terminal
