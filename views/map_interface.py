@@ -27,6 +27,21 @@ class mainInterface(tk.Tk):
   random_pos = zeros[np.random.choice(len(zeros))]
   matriz[random_pos[0], random_pos[1]] = 4
 
+  def possible_movements():
+    redYoshi_position = np.where(matriz == 4)
+    coordinates = list(zip(redYoshi_position[0], redYoshi_position[1]))
+    if coordinates:  # Verificar si hay elementos en la lista
+        y_position, x_position = coordinates[0]
+        print(f"Posiciones de 4: {coordinates}")
+        print(f"Valor Y: {y_position}")
+        print(f"Valor X: {x_position}")
+    else:
+        print("No se encontraron posiciones de 4 en la matriz.")
+    if ():
+      pass
+
+  possible_movements()
+
   def __init__(self):
 
     super().__init__()
