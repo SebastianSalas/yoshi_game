@@ -27,21 +27,6 @@ class mainInterface(tk.Tk):
   random_pos = zeros[np.random.choice(len(zeros))]
   matriz[random_pos[0], random_pos[1]] = 4
 
-  def possible_movements():
-    redYoshi_position = np.where(matriz == 4)
-    coordinates = list(zip(redYoshi_position[0], redYoshi_position[1]))
-    if coordinates:  # Verificar si hay elementos en la lista
-        y_position, x_position = coordinates[0]
-        print(f"Posiciones de 4: {coordinates}")
-        print(f"Valor Y: {y_position}")
-        print(f"Valor X: {x_position}")
-    else:
-        print("No se encontraron posiciones de 4 en la matriz.")
-    if ():
-      pass
-
-  possible_movements()
-
   def __init__(self):
 
     super().__init__()
@@ -184,6 +169,51 @@ class mainInterface(tk.Tk):
     self.buttons_frame.columnconfigure(0, weight=1)
     self.buttons_frame.columnconfigure(1, weight=1)
 
+    def possible_movements(orientation): # Coordenadas (Y, X)
+      red_position = np.where(matriz == 4)
+      green_position = np.where(matriz == 3)
+      red_coordinates = list(zip(red_position[0], red_position[1]))
+      green_coordinates = list(zip(green_position[0], green_position[1]))
+      red_y, red_x = red_coordinates[0]
+      green_y, green_x = green_coordinates[0]
+      print(f"Posiciones de red: {red_coordinates}")
+      #print(f"Valor Y: {red_y}")
+      #print(f"Valor X: {red_x}")
+      #print(f"Posiciones de green: {green_coordinates}")
+      #print(f"Valor Y: {green_y}")
+      #print(f"Valor X: {green_x}")
+      
+      # Se comprueba que sea posible el movimiento, que no esté el yoshi verde en la casilla...
+      # Movimiento superior izquierdo
+      if (red_y - 2 >= 0 and red_x - 1 >= 0 and (red_y - 2, red_x - 1) != (green_y, green_x) and orientation == "7"):
+        print("Sup-Izq")
+        matriz[red_y, red_x] = 0
+        matriz[red_y - 2, red_x - 1] = 4
+      # Movimiento superior derecho
+      if (red_y - 2 >= 0 and red_x + 1 <= 7 and (red_y - 2, red_x + 1) != (green_y, green_x) and orientation == "9"):
+        print("Sup-Der")
+        matriz[red_y, red_x] = 0
+        matriz[red_y - 2, red_x + 1] = 4
+      # Movimiento inferior derecho
+      if (red_y + 2 <= 7 and red_x + 1 <= 7 and (red_y + 2, red_x + 1) != (green_y, green_x) and orientation == "3"):
+        print("Inf-Der")
+        matriz[red_y, red_x] = 0
+        matriz[red_y + 2, red_x + 1] = 4
+      # Movimiento inferior izquierdo
+      if (red_y + 2 <= 7 and red_x - 1 >= 0 and (red_y + 2, red_x - 1) != (green_y, green_x) and orientation == "1"):
+        print("Inf-Izq")
+        matriz[red_y, red_x] = 0
+        matriz[red_y + 2, red_x - 1] = 4
+    
+    def on_arrow_key(event):
+      # Imprimir la tecla presionada
+      #print(f"Tecla presionada: {event.keysym}")
+      possible_movements(event.keysym)
+
+      app.dibujar_matriz(None)
+
+    self.bind("<Key>", on_arrow_key)
+
   # Cálculo de las dimensiones que tendrá la imagen principal de Yoshi
   def resize_first_image(self, image, size):
     return ImageTk.PhotoImage(image.resize(size, Image.LANCZOS))
@@ -197,14 +227,13 @@ class mainInterface(tk.Tk):
 
     # Eliminar dibujos anteriores
     self.canvas_matriz.delete("all")
-    if hasattr(self, 'label_agent_icon') and self.label_agent_icon:self.label_agent_icon.destroy()
     # Número de filas y columnas en la matriz
     rows = 8
     columns = 8
     # Tamaño de cada rectángulo en el Canvas
     rectangle_width = self.canvas_matriz.winfo_width() // columns
     rectangle_height = self.canvas_matriz.winfo_height() // rows
-
+    print("Llamada dibujar")
     for row in range(rows):
       for column in range(columns):
 
