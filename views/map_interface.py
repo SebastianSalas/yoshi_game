@@ -6,7 +6,7 @@ from PIL import Image, ImageTk
 
 class mainInterface(tk.Tk):
 
-  global initial_matriz, matriz
+  global initial_matriz, matriz, rows, columns
 
   initial_matriz = np.array([
     [1, 1, 0, 0, 0, 0, 1, 1],
@@ -19,6 +19,9 @@ class mainInterface(tk.Tk):
     [1, 1, 0, 0, 0, 0, 1, 1]])
 
   matriz = initial_matriz
+
+  # Número de filas y columnas en la matriz
+  rows, columns = initial_matriz.shape
   
   #First yoshi
   zeros = np.argwhere(matriz == 0)
@@ -99,7 +102,7 @@ class mainInterface(tk.Tk):
     self.select_movement_label.pack(pady="5", padx="10", fill="x")
 
     # Selector del próximo movimiento
-    movements_options = ["Seleccionar...", "Superior-Izquierdo", "Superior-Derecho", "Inferior-Izquierdo", "Inferior derecho"]
+    movements_options = ["Seleccionar...", "Superior - Izquierdo", "Superior - Derecho", "Inferior - Izquierdo", "Inferior - derecho", "Derecho - Superior", "Derecho - Inferior", "Izquierdo - Inferior", "Izquierdo - Superior"]
     selected_movement = tk.StringVar(self.right_canvas)
     selected_movement.set(movements_options[0])
     movements_menu = tk.OptionMenu(self.right_canvas, selected_movement, *movements_options)
@@ -202,25 +205,55 @@ class mainInterface(tk.Tk):
           matriz[red_y - 2, red_x - 1] = 4
         
         # Movimiento superior derecho
-        elif (red_y - 2 >= 0 and red_x + 1 <= 7 and (red_y - 2, red_x + 1) != (green_y, green_x) and orientation == "9"):
+        elif (red_y - 2 >= 0 and red_x + 1 <= (columns - 1) and (red_y - 2, red_x + 1) != (green_y, green_x) and orientation == "9"):
           print("Sup-Der")
           check_coin(matriz[red_y - 2, red_x + 1], self.red_score_label.cget("text"))
           matriz[red_y, red_x] = 0
           matriz[red_y - 2, red_x + 1] = 4
         
         # Movimiento inferior derecho
-        elif (red_y + 2 <= 7 and red_x + 1 <= 7 and (red_y + 2, red_x + 1) != (green_y, green_x) and orientation == "3"):
+        elif (red_y + 2 <= (rows - 1) and red_x + 1 <= (columns - 1) and (red_y + 2, red_x + 1) != (green_y, green_x) and orientation == "3"):
           print("Inf-Der")
           check_coin(matriz[red_y + 2, red_x + 1], self.red_score_label.cget("text"))
           matriz[red_y, red_x] = 0
           matriz[red_y + 2, red_x + 1] = 4
         
         # Movimiento inferior izquierdo
-        elif (red_y + 2 <= 7 and red_x - 1 >= 0 and (red_y + 2, red_x - 1) != (green_y, green_x) and orientation == "1"):
+        elif (red_y + 2 <= (rows - 1) and red_x - 1 >= 0 and (red_y + 2, red_x - 1) != (green_y, green_x) and orientation == "1"):
           print("Inf-Izq")
           check_coin(matriz[red_y + 2, red_x - 1], self.red_score_label.cget("text"))
           matriz[red_y, red_x] = 0
           matriz[red_y + 2, red_x - 1] = 4
+
+          prueba = ["Seleccionar...", "Superior - Izquierdo", "Superior - Derecho", "Inferior - Izquierdo", "Inferior - derecho", "Derecho - Superior", "Derecho - Inferior", "Izquierdo - Inferior", "Izquierdo - Superior"]
+
+        # Movimiento derecho superior
+        elif (red_y - 1 >= 0 and red_x + 2 <= (columns - 1) and (red_y - 1, red_x + 2) != (green_y, green_x) and orientation == "Derecho - Superior"):
+          print("Der-Sup")
+          check_coin(matriz[red_y - 1, red_x + 2], self.red_score_label.cget("text"))
+          matriz[red_y, red_x] = 0
+          matriz[red_y - 1, red_x + 2] = 4
+        
+        # Movimiento derecho inferior
+        elif (red_y + 1 >= 0 and red_x + 2 <= (columns - 1) and (red_y + 1, red_x + 2) != (green_y, green_x) and orientation == "Derecho - Inferior"):
+          print("Der-Inf")
+          check_coin(matriz[red_y + 1, red_x + 2], self.red_score_label.cget("text"))
+          matriz[red_y, red_x] = 0
+          matriz[red_y + 1, red_x + 2] = 4
+        
+        # Movimiento izquierdo inferior
+        elif (red_y + 1 <= (rows - 1) and red_x - 2 >= 0 and (red_y + 1, red_x - 2) != (green_y, green_x) and orientation == "Izquierdo - Inferior"):
+          print("Izq-Inf")
+          check_coin(matriz[red_y + 1, red_x - 2], self.red_score_label.cget("text"))
+          matriz[red_y, red_x] = 0
+          matriz[red_y + 1, red_x - 2] = 4
+        
+        # Movimiento izquierdo superior
+        elif (red_y - 1 >= 0 and red_x - 2 >= 0 and (red_y - 1, red_x - 2) != (green_y, green_x) and orientation == "Izquierdo - Superior"):
+          print("Izq-Sup")
+          check_coin(matriz[red_y - 1, red_x - 2], self.red_score_label.cget("text"))
+          matriz[red_y, red_x] = 0
+          matriz[red_y - 1, red_x - 2] = 4
       else:
         # Condiciones del yoshi verde
         pass
@@ -245,9 +278,6 @@ class mainInterface(tk.Tk):
 
     # Eliminar dibujos anteriores
     self.canvas_matriz.delete("all")
-    # Número de filas y columnas en la matriz
-    rows = 8
-    columns = 8
     # Tamaño de cada rectángulo en el Canvas
     rectangle_width = self.canvas_matriz.winfo_width() // columns
     rectangle_height = self.canvas_matriz.winfo_height() // rows
