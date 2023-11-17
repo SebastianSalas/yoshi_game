@@ -6,9 +6,9 @@ from PIL import Image, ImageTk
 
 class mainInterface(tk.Tk):
 
-  global matriz
+  global initial_matriz, matriz
 
-  matriz = np.array([
+  initial_matriz = np.array([
     [1, 1, 0, 0, 0, 0, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 1],
     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -17,6 +17,8 @@ class mainInterface(tk.Tk):
     [0, 0, 0, 0, 0, 0, 0, 0],
     [1, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 0, 0, 0, 0, 1, 1]])
+
+  matriz = initial_matriz
   
   #First yoshi
   zeros = np.argwhere(matriz == 0)
@@ -175,49 +177,57 @@ class mainInterface(tk.Tk):
       elif (num == 2):
         self.red_score_label.config(text=str(int(score) + 3))
 
-    def possible_movements(orientation): # Coordenadas (Y, X)
-      red_position = np.where(matriz == 4)
+    def possible_movements(yoshi, orientation): # Coordenadas (Y, X)
       green_position = np.where(matriz == 3)
-      red_coordinates = list(zip(red_position[0], red_position[1]))
+      red_position = np.where(matriz == 4)
       green_coordinates = list(zip(green_position[0], green_position[1]))
-      red_y, red_x = red_coordinates[0]
+      red_coordinates = list(zip(red_position[0], red_position[1]))
       green_y, green_x = green_coordinates[0]
-      print(f"Posiciones de red: {red_coordinates}")
+      red_y, red_x = red_coordinates[0]
+      #print(f"Posición de red: {red_position}")
       #print(f"Valor Y: {red_y}")
       #print(f"Valor X: {red_x}")
       #print(f"Posiciones de green: {green_coordinates}")
       #print(f"Valor Y: {green_y}")
       #print(f"Valor X: {green_x}")
-      
-      # Se comprueba que sea posible el movimiento, que no esté el yoshi verde en la casilla...
-      # Movimiento superior izquierdo
-      if (red_y - 2 >= 0 and red_x - 1 >= 0 and (red_y - 2, red_x - 1) != (green_y, green_x) and orientation == "7"):
-        print("Sup-Izq")
-        check_coin(matriz[red_y - 2, red_x - 1], self.red_score_label.cget("text"))
-        matriz[red_y, red_x] = 0
-        matriz[red_y - 2, red_x - 1] = 4
-      # Movimiento superior derecho
-      elif (red_y - 2 >= 0 and red_x + 1 <= 7 and (red_y - 2, red_x + 1) != (green_y, green_x) and orientation == "9"):
-        print("Sup-Der")
-        check_coin(matriz[red_y - 2, red_x + 1], self.red_score_label.cget("text"))
-        matriz[red_y, red_x] = 0
-        matriz[red_y - 2, red_x + 1] = 4
-      # Movimiento inferior derecho
-      elif (red_y + 2 <= 7 and red_x + 1 <= 7 and (red_y + 2, red_x + 1) != (green_y, green_x) and orientation == "3"):
-        print("Inf-Der")
-        check_coin(matriz[red_y + 2, red_x + 1], self.red_score_label.cget("text"))
-        matriz[red_y, red_x] = 0
-        matriz[red_y + 2, red_x + 1] = 4
-      # Movimiento inferior izquierdo
-      elif (red_y + 2 <= 7 and red_x - 1 >= 0 and (red_y + 2, red_x - 1) != (green_y, green_x) and orientation == "1"):
-        print("Inf-Izq")
-        check_coin(matriz[red_y + 2, red_x - 1], self.red_score_label.cget("text"))
-        matriz[red_y, red_x] = 0
-        matriz[red_y + 2, red_x - 1] = 4
+      if (yoshi == "red"): 
+        # Se comprueba que sea posible el movimiento y que no esté el yoshi verde en la casilla...
+        
+        # Movimiento superior izquierdo
+        if (red_y - 2 >= 0 and red_x - 1 >= 0 and (red_y - 2, red_x - 1) != (green_y, green_x) and orientation == "7"):
+          print("Sup-Izq")
+          check_coin(matriz[red_y - 2, red_x - 1], self.red_score_label.cget("text"))
+          # Agregar un muro donde había una moneda después que el Yoshi se va
+          matriz[red_y, red_x] = 0
+          matriz[red_y - 2, red_x - 1] = 4
+        
+        # Movimiento superior derecho
+        elif (red_y - 2 >= 0 and red_x + 1 <= 7 and (red_y - 2, red_x + 1) != (green_y, green_x) and orientation == "9"):
+          print("Sup-Der")
+          check_coin(matriz[red_y - 2, red_x + 1], self.red_score_label.cget("text"))
+          matriz[red_y, red_x] = 0
+          matriz[red_y - 2, red_x + 1] = 4
+        
+        # Movimiento inferior derecho
+        elif (red_y + 2 <= 7 and red_x + 1 <= 7 and (red_y + 2, red_x + 1) != (green_y, green_x) and orientation == "3"):
+          print("Inf-Der")
+          check_coin(matriz[red_y + 2, red_x + 1], self.red_score_label.cget("text"))
+          matriz[red_y, red_x] = 0
+          matriz[red_y + 2, red_x + 1] = 4
+        
+        # Movimiento inferior izquierdo
+        elif (red_y + 2 <= 7 and red_x - 1 >= 0 and (red_y + 2, red_x - 1) != (green_y, green_x) and orientation == "1"):
+          print("Inf-Izq")
+          check_coin(matriz[red_y + 2, red_x - 1], self.red_score_label.cget("text"))
+          matriz[red_y, red_x] = 0
+          matriz[red_y + 2, red_x - 1] = 4
+      else:
+        # Condiciones del yoshi verde
+        pass
     
     def on_arrow_key(event):
       # print(f"Tecla presionada: {event.keysym}")
-      possible_movements(event.keysym)
+      possible_movements("red", event.keysym)
       app.dibujar_matriz(None)
 
     self.bind("<Key>", on_arrow_key)
@@ -241,7 +251,6 @@ class mainInterface(tk.Tk):
     # Tamaño de cada rectángulo en el Canvas
     rectangle_width = self.canvas_matriz.winfo_width() // columns
     rectangle_height = self.canvas_matriz.winfo_height() // rows
-    print("Llamada dibujar")
     for row in range(rows):
       for column in range(columns):
 
@@ -267,17 +276,8 @@ class mainInterface(tk.Tk):
           image_path = "resources/images/yoshi_Green.png"
         elif matriz[row][column] == 4: # Casilla con Yoshi rojo operado por el jugador
           image_path = "resources/images/yoshi_Red.png"
-        elif matriz[row][column] == 5: # Punto de inicio
-          image_path = "resources/images/fire_truck.png"
-          
-          if (x1 == 0 and y1 != 0): # Posición cuando X=0 y Y!=0
-            self.label_agent_icon.place(x = x1 + (rectangle_width * 0.15), y = y1 + round(y1 ** 0.35))
-          elif (x1 != 0 and y1 == 0): # Posición cuando X!=0 y Y=0
-            self.label_agent_icon.place(x = x1 + (rectangle_width * 0.15), y = y1 + round(rectangle_height ** 0.55))
-          elif (x1 == 0 and y1 == 0): # Posición cuando X=0 y Y=0
-            self.label_agent_icon.place(x=x1 + (rectangle_width * 0.15), y=y1 + round(rectangle_height ** 0.55))
-          else: # Posición en cualquier otro caso
-            self.label_agent_icon.place(x=x1 + round(x1 ** 0.35), y=y1 + round(y1 ** 0.35))
+        elif matriz[row][column] == 5: # Casilla inhabilitada
+          image_path = "resources/images/wall.png"
 
         # Dibujar rectángulos en el Canvas
         self.canvas_matriz.create_rectangle(x1, y1, x2, y2, fill=color, outline="black")
