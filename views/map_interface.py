@@ -143,7 +143,6 @@ class mainInterface(tk.Tk):
         # Activar el selector de movimiento
         movements_menu.config(state=tk.ACTIVE)
 
-
     # Botón para iniciar la partida
     start_button = tk.Button(self.buttons_frame, text="Iniciar", bg="#8EEA6F", fg="black", command=start_algorithm)
     start_button.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
@@ -156,10 +155,20 @@ class mainInterface(tk.Tk):
       movements_menu.config(state=tk.DISABLED)
       selected_difficulty.set(difficulty_options[0])
       selected_movement.set(movements_options[0])
+    
     # Botón para reiniciar la partida
     restart_button = tk.Button(self.buttons_frame, text="Reiniciar", bg="#8EEA6F", fg="black", command=restart)
     restart_button.grid(row=0, column=1, sticky="ew", padx=5, pady=5)
     restart_button.config(font=('Helvetica', 12))
+
+    # Función para jugar
+    def play():
+      possible_movements("red", "") # Capturar orientación del movimiento
+
+    # Botón jugar
+    play_button = tk.Button(self.buttons_frame, text="Jugar", bg="#8EEA6F", fg="black", command=credits)
+    play_button.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
+    play_button.config(font=('Helvetica', 12))
 
     # Crear ventana con los créditos
     def credits():
@@ -167,7 +176,7 @@ class mainInterface(tk.Tk):
 
     # Botón de créditos
     credits_button = tk.Button(self.buttons_frame, text="Créditos", bg="#8EEA6F", fg="black", command=credits)
-    credits_button.grid(row=1, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
+    credits_button.grid(row=1, column=1, sticky="ew", padx=5, pady=5)
     credits_button.config(font=('Helvetica', 12))
 
     # Distribuir uniformemente el espacio en X entre los botones
@@ -254,6 +263,7 @@ class mainInterface(tk.Tk):
           check_coin(matriz[red_y - 1, red_x - 2], self.red_score_label.cget("text"))
           matriz[red_y, red_x] = 0
           matriz[red_y - 1, red_x - 2] = 4
+      
       else:
         # Condiciones del yoshi verde
         pass
