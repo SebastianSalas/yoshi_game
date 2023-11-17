@@ -120,7 +120,7 @@ class mainInterface(tk.Tk):
     self.green_score_label.grid(row=0, column=1, pady=0, padx=10, sticky="w")
 
     # Etiqueta de puntuación del jugador
-    self.red_score_label = tk.Label(self.score_frame, text="Jugador", fg="red", font=("Helvetica", 12), anchor="w", justify="left")
+    self.red_score_label = tk.Label(self.score_frame, text="0", fg="red", font=("Helvetica", 12), anchor="w", justify="left")
     self.red_score_label.config(bg="white")
     self.red_score_label.grid(row=0, column=2, pady=0, padx=10, sticky="w")
 
@@ -169,6 +169,12 @@ class mainInterface(tk.Tk):
     self.buttons_frame.columnconfigure(0, weight=1)
     self.buttons_frame.columnconfigure(1, weight=1)
 
+    def check_coin(num, score):
+      if (num == 1):
+        self.red_score_label.config(text=str(int(score) + 1))
+      elif (num == 2):
+        self.red_score_label.config(text=str(int(score) + 3))
+
     def possible_movements(orientation): # Coordenadas (Y, X)
       red_position = np.where(matriz == 4)
       green_position = np.where(matriz == 3)
@@ -187,29 +193,31 @@ class mainInterface(tk.Tk):
       # Movimiento superior izquierdo
       if (red_y - 2 >= 0 and red_x - 1 >= 0 and (red_y - 2, red_x - 1) != (green_y, green_x) and orientation == "7"):
         print("Sup-Izq")
+        check_coin(matriz[red_y - 2, red_x - 1], self.red_score_label.cget("text"))
         matriz[red_y, red_x] = 0
         matriz[red_y - 2, red_x - 1] = 4
       # Movimiento superior derecho
-      if (red_y - 2 >= 0 and red_x + 1 <= 7 and (red_y - 2, red_x + 1) != (green_y, green_x) and orientation == "9"):
+      elif (red_y - 2 >= 0 and red_x + 1 <= 7 and (red_y - 2, red_x + 1) != (green_y, green_x) and orientation == "9"):
         print("Sup-Der")
+        check_coin(matriz[red_y - 2, red_x + 1], self.red_score_label.cget("text"))
         matriz[red_y, red_x] = 0
         matriz[red_y - 2, red_x + 1] = 4
       # Movimiento inferior derecho
-      if (red_y + 2 <= 7 and red_x + 1 <= 7 and (red_y + 2, red_x + 1) != (green_y, green_x) and orientation == "3"):
+      elif (red_y + 2 <= 7 and red_x + 1 <= 7 and (red_y + 2, red_x + 1) != (green_y, green_x) and orientation == "3"):
         print("Inf-Der")
+        check_coin(matriz[red_y + 2, red_x + 1], self.red_score_label.cget("text"))
         matriz[red_y, red_x] = 0
         matriz[red_y + 2, red_x + 1] = 4
       # Movimiento inferior izquierdo
-      if (red_y + 2 <= 7 and red_x - 1 >= 0 and (red_y + 2, red_x - 1) != (green_y, green_x) and orientation == "1"):
+      elif (red_y + 2 <= 7 and red_x - 1 >= 0 and (red_y + 2, red_x - 1) != (green_y, green_x) and orientation == "1"):
         print("Inf-Izq")
+        check_coin(matriz[red_y + 2, red_x - 1], self.red_score_label.cget("text"))
         matriz[red_y, red_x] = 0
         matriz[red_y + 2, red_x - 1] = 4
     
     def on_arrow_key(event):
-      # Imprimir la tecla presionada
-      #print(f"Tecla presionada: {event.keysym}")
+      # print(f"Tecla presionada: {event.keysym}")
       possible_movements(event.keysym)
-
       app.dibujar_matriz(None)
 
     self.bind("<Key>", on_arrow_key)
