@@ -55,7 +55,8 @@ class mainInterface(tk.Tk):
     # Canvas para representar la matríz en el contenedor izquierdo
     self.canvas_matriz = tk.Canvas(self.left_frame, bg="white", bd=2, relief="solid", highlightbackground="#8EEA6F")
     self.canvas_matriz.pack(expand=True, fill="both")
-
+    # Configurar evento de clic en el Canvas
+    self.canvas_matriz.bind("<Button-1>", self.on_canvas_click)
     self.canvas_matriz.bind("<Configure>", self.dibujar_matriz)
 
     # Canvas en el contenedor derecho
@@ -202,6 +203,22 @@ class mainInterface(tk.Tk):
     self.photo = self.resize_first_image(Image.open("resources/images/yoshigame.png"), (self.right_canvas.winfo_width(), round(self.right_canvas.winfo_height() * 0.4)))
     self.first_label.config(image=self.photo)
 
+  # Manejar evento de clic en el Canvas
+  def on_canvas_click(self, event):
+    # Obtener la posición del clic
+    x, y = event.x, event.y
+
+    # Tamaño de cada rectángulo en el Canvas
+    rectangle_width = self.canvas_matriz.winfo_width() // columns
+    rectangle_height = self.canvas_matriz.winfo_height() // rows
+
+    # Calcular la fila y columna del clic
+    row = y // rectangle_height
+    column = x // rectangle_width
+
+    # Realizar acciones según la fila y columna clicada
+    print(f"Clic en la fila {row} y columna {column}")
+  
   def ubicate_yoshis(self):
     global matriz
     matriz = np.copy(initial_matriz)
