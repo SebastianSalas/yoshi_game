@@ -94,7 +94,7 @@ class mainInterface(tk.Tk):
     self.select_movement_label.pack(pady="5", padx="10", fill="x")
 
     # Selector del próximo movimiento
-    movements_options = ["Seleccionar...", "Superior - Izquierdo", "Superior - Derecho", "Inferior - Izquierdo", "Inferior - derecho", "Derecho - Superior", "Derecho - Inferior", "Izquierdo - Inferior", "Izquierdo - Superior"]
+    movements_options = ["Seleccionar...", "Superior - Izquierdo", "Superior - Derecho", "Inferior - Izquierdo", "Inferior - Derecho", "Derecho - Superior", "Derecho - Inferior", "Izquierdo - Inferior", "Izquierdo - Superior"]
     selected_movement = tk.StringVar(self.right_canvas)
     selected_movement.set(movements_options[0])
     movements_menu = tk.OptionMenu(self.right_canvas, selected_movement, *movements_options)
@@ -162,24 +162,24 @@ class mainInterface(tk.Tk):
     # Función para jugar
     def play():
       #possible_movements("red", "") # Capturar orientación del movimiento
-      print("boton presionado")
+      app.possible_movements("red", selected_movement.get())
       selected_movement.set(movements_options[0])
+      app.dibujar_matriz(None)
 
     # Botón jugar
     play_button = tk.Button(self.buttons_frame, text="Jugar", bg="#8EEA6F", fg="black", command=play)
     play_button.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
     play_button.config(font=('Helvetica', 12), state=tk.DISABLED)
 
-    # Crear ventana con los créditos
     def credits():
+      # Crear ventana con los créditos
       credits_window = tk.Toplevel(self)
       credits_window.title("Proyecto #2: Yoshi´s battle - Inteligencia artificial")
       credits_window.geometry(f"{round(windowWidth * 0.5)}x{round(windowHeight * 0.5)}+{x}+{y}")
       credits_window.config(bg="#8EEA6F")
-
       # Etiqueta para mostrar los créditos
       credits_label = tk.Label(credits_window, text="HECHO POR:\n\nDIEGO FERNANDO VICTORIA - 202125877\nDIEGO.VICTORIA@CORREOUNIVALLE.EDU.CO\n\nJANIERT SEBASTIÁN SALAS - 201941265\nJANIERT.SALAS@CORREOUNIVALLE.EDU.CO\n\nJHON ALEXANDER VALENCIA - 202042426\nJHON.HILAMO@CORREOUNIVALLE.EDU.CO")
-      credits_label.config(font=('Helvetica', 10), bg="white", bd=3, relief="solid")
+      credits_label.config(font=('Helvetica', 11), bg="white", bd=3, relief="solid")
       credits_label.place(relx=0.5, rely=0.5, anchor="center")
       credits_window.transient(self)
       credits_window.wait_window()
@@ -192,95 +192,10 @@ class mainInterface(tk.Tk):
     # Distribuir uniformemente el espacio en X entre los botones
     self.buttons_frame.columnconfigure(0, weight=1)
     self.buttons_frame.columnconfigure(1, weight=1)
-
-    def check_coin(num, score):
-      if (num == 1):
-        self.red_score_label.config(text=str(int(score) + 1))
-      elif (num == 2):
-        self.red_score_label.config(text=str(int(score) + 3))
-
-    def possible_movements(yoshi, orientation): # Coordenadas (Y, X)
-      green_position = np.where(matriz == 3)
-      red_position = np.where(matriz == 4)
-      green_coordinates = list(zip(green_position[0], green_position[1]))
-      red_coordinates = list(zip(red_position[0], red_position[1]))
-      green_y, green_x = green_coordinates[0]
-      red_y, red_x = red_coordinates[0]
-      #print(f"Posición de red: {red_position}")
-      #print(f"Valor Y: {red_y}")
-      #print(f"Valor X: {red_x}")
-      #print(f"Posiciones de green: {green_coordinates}")
-      #print(f"Valor Y: {green_y}")
-      #print(f"Valor X: {green_x}")
-      if (yoshi == "red"): 
-        # Se comprueba que sea posible el movimiento y que no esté el yoshi verde en la casilla...
-        
-        # Movimiento superior izquierdo
-        if (red_y - 2 >= 0 and red_x - 1 >= 0 and (red_y - 2, red_x - 1) != (green_y, green_x) and orientation == "7"):
-          print("Sup-Izq")
-          check_coin(matriz[red_y - 2, red_x - 1], self.red_score_label.cget("text"))
-          # Agregar un muro donde había una moneda después que el Yoshi se va
-          matriz[red_y, red_x] = 0
-          matriz[red_y - 2, red_x - 1] = 4
-        
-        # Movimiento superior derecho
-        elif (red_y - 2 >= 0 and red_x + 1 <= (columns - 1) and (red_y - 2, red_x + 1) != (green_y, green_x) and orientation == "9"):
-          print("Sup-Der")
-          check_coin(matriz[red_y - 2, red_x + 1], self.red_score_label.cget("text"))
-          matriz[red_y, red_x] = 0
-          matriz[red_y - 2, red_x + 1] = 4
-        
-        # Movimiento inferior derecho
-        elif (red_y + 2 <= (rows - 1) and red_x + 1 <= (columns - 1) and (red_y + 2, red_x + 1) != (green_y, green_x) and orientation == "3"):
-          print("Inf-Der")
-          check_coin(matriz[red_y + 2, red_x + 1], self.red_score_label.cget("text"))
-          matriz[red_y, red_x] = 0
-          matriz[red_y + 2, red_x + 1] = 4
-        
-        # Movimiento inferior izquierdo
-        elif (red_y + 2 <= (rows - 1) and red_x - 1 >= 0 and (red_y + 2, red_x - 1) != (green_y, green_x) and orientation == "1"):
-          print("Inf-Izq")
-          check_coin(matriz[red_y + 2, red_x - 1], self.red_score_label.cget("text"))
-          matriz[red_y, red_x] = 0
-          matriz[red_y + 2, red_x - 1] = 4
-
-          prueba = ["Seleccionar...", "Superior - Izquierdo", "Superior - Derecho", "Inferior - Izquierdo", "Inferior - derecho", "Derecho - Superior", "Derecho - Inferior", "Izquierdo - Inferior", "Izquierdo - Superior"]
-
-        # Movimiento derecho superior
-        elif (red_y - 1 >= 0 and red_x + 2 <= (columns - 1) and (red_y - 1, red_x + 2) != (green_y, green_x) and orientation == "Derecho - Superior"):
-          print("Der-Sup")
-          check_coin(matriz[red_y - 1, red_x + 2], self.red_score_label.cget("text"))
-          matriz[red_y, red_x] = 0
-          matriz[red_y - 1, red_x + 2] = 4
-        
-        # Movimiento derecho inferior
-        elif (red_y + 1 >= 0 and red_x + 2 <= (columns - 1) and (red_y + 1, red_x + 2) != (green_y, green_x) and orientation == "Derecho - Inferior"):
-          print("Der-Inf")
-          check_coin(matriz[red_y + 1, red_x + 2], self.red_score_label.cget("text"))
-          matriz[red_y, red_x] = 0
-          matriz[red_y + 1, red_x + 2] = 4
-        
-        # Movimiento izquierdo inferior
-        elif (red_y + 1 <= (rows - 1) and red_x - 2 >= 0 and (red_y + 1, red_x - 2) != (green_y, green_x) and orientation == "Izquierdo - Inferior"):
-          print("Izq-Inf")
-          check_coin(matriz[red_y + 1, red_x - 2], self.red_score_label.cget("text"))
-          matriz[red_y, red_x] = 0
-          matriz[red_y + 1, red_x - 2] = 4
-        
-        # Movimiento izquierdo superior
-        elif (red_y - 1 >= 0 and red_x - 2 >= 0 and (red_y - 1, red_x - 2) != (green_y, green_x) and orientation == "Izquierdo - Superior"):
-          print("Izq-Sup")
-          check_coin(matriz[red_y - 1, red_x - 2], self.red_score_label.cget("text"))
-          matriz[red_y, red_x] = 0
-          matriz[red_y - 1, red_x - 2] = 4
-      
-      else:
-        # Condiciones del yoshi verde
-        pass
     
     def on_arrow_key(event):
       # print(f"Tecla presionada: {event.keysym}")
-      possible_movements("red", event.keysym)
+      app.possible_movements("red", event.keysym)
       app.dibujar_matriz(None)
 
     self.bind("<Key>", on_arrow_key)
@@ -306,6 +221,89 @@ class mainInterface(tk.Tk):
     zeros = np.delete(zeros, np.where((zeros == random_pos).all(axis=1)), axis=0)
     random_pos = zeros[np.random.choice(len(zeros))]
     matriz[random_pos[0], random_pos[1]] = 4
+
+  def check_coin(self, num, score): 
+    if (num == 1):
+      self.red_score_label.config(text=str(int(score) + 1))
+    elif (num == 2):
+      self.red_score_label.config(text=str(int(score) + 3))
+
+  def possible_movements(self, yoshi, orientation): # Coordenadas (Y, X)
+    green_position = np.where(matriz == 3)
+    red_position = np.where(matriz == 4)
+    green_coordinates = list(zip(green_position[0], green_position[1]))
+    red_coordinates = list(zip(red_position[0], red_position[1]))
+    green_y, green_x = green_coordinates[0]
+    red_y, red_x = red_coordinates[0]
+    #print(f"Posición de red: {red_position}")
+    #print(f"Valor Y: {red_y}")
+    #print(f"Valor X: {red_x}")
+    #print(f"Posiciones de green: {green_coordinates}")
+    #print(f"Valor Y: {green_y}")
+    #print(f"Valor X: {green_x}")
+    if (yoshi == "red"): 
+      # Se comprueba que sea posible el movimiento y que no esté el yoshi verde en la casilla...
+      
+      # Movimiento superior izquierdo
+      if (red_y - 2 >= 0 and red_x - 1 >= 0 and (red_y - 2, red_x - 1) != (green_y, green_x) and orientation == "Superior - Izquierdo"):
+        print("Sup-Izq")
+        app.check_coin(matriz[red_y - 2, red_x - 1], self.red_score_label.cget("text"))
+        # Agregar un muro donde había una moneda después que el Yoshi se va
+        matriz[red_y, red_x] = 0
+        matriz[red_y - 2, red_x - 1] = 4
+      
+      # Movimiento superior derecho
+      elif (red_y - 2 >= 0 and red_x + 1 <= (columns - 1) and (red_y - 2, red_x + 1) != (green_y, green_x) and orientation == "Superior - Derecho"):
+        print("Sup-Der")
+        app.check_coin(matriz[red_y - 2, red_x + 1], self.red_score_label.cget("text"))
+        matriz[red_y, red_x] = 0
+        matriz[red_y - 2, red_x + 1] = 4
+      
+      # Movimiento inferior derecho
+      elif (red_y + 2 <= (rows - 1) and red_x + 1 <= (columns - 1) and (red_y + 2, red_x + 1) != (green_y, green_x) and orientation == "Inferior - derecho"):
+        print("Inf-Der")
+        app.check_coin(matriz[red_y + 2, red_x + 1], self.red_score_label.cget("text"))
+        matriz[red_y, red_x] = 0
+        matriz[red_y + 2, red_x + 1] = 4
+      
+      # Movimiento inferior izquierdo
+      elif (red_y + 2 <= (rows - 1) and red_x - 1 >= 0 and (red_y + 2, red_x - 1) != (green_y, green_x) and orientation == "Inferior - Izquierdo"):
+        print("Inf-Izq")
+        app.check_coin(matriz[red_y + 2, red_x - 1], self.red_score_label.cget("text"))
+        matriz[red_y, red_x] = 0
+        matriz[red_y + 2, red_x - 1] = 4
+
+      # Movimiento derecho superior
+      elif (red_y - 1 >= 0 and red_x + 2 <= (columns - 1) and (red_y - 1, red_x + 2) != (green_y, green_x) and orientation == "Derecho - Superior"):
+        print("Der-Sup")
+        app.check_coin(matriz[red_y - 1, red_x + 2], self.red_score_label.cget("text"))
+        matriz[red_y, red_x] = 0
+        matriz[red_y - 1, red_x + 2] = 4
+      
+      # Movimiento derecho inferior
+      elif (red_y + 1 >= 0 and red_x + 2 <= (columns - 1) and (red_y + 1, red_x + 2) != (green_y, green_x) and orientation == "Derecho - Inferior"):
+        print("Der-Inf")
+        app.check_coin(matriz[red_y + 1, red_x + 2], self.red_score_label.cget("text"))
+        matriz[red_y, red_x] = 0
+        matriz[red_y + 1, red_x + 2] = 4
+      
+      # Movimiento izquierdo inferior
+      elif (red_y + 1 <= (rows - 1) and red_x - 2 >= 0 and (red_y + 1, red_x - 2) != (green_y, green_x) and orientation == "Izquierdo - Inferior"):
+        print("Izq-Inf")
+        app.check_coin(matriz[red_y + 1, red_x - 2], self.red_score_label.cget("text"))
+        matriz[red_y, red_x] = 0
+        matriz[red_y + 1, red_x - 2] = 4
+      
+      # Movimiento izquierdo superior
+      elif (red_y - 1 >= 0 and red_x - 2 >= 0 and (red_y - 1, red_x - 2) != (green_y, green_x) and orientation == "Izquierdo - Superior"):
+        print("Izq-Sup")
+        app.check_coin(matriz[red_y - 1, red_x - 2], self.red_score_label.cget("text"))
+        matriz[red_y, red_x] = 0
+        matriz[red_y - 1, red_x - 2] = 4
+    
+    else:
+      # Condiciones del yoshi verde
+      pass
 
   def dibujar_matriz(self, event):
 
