@@ -6,18 +6,23 @@ from PIL import Image, ImageTk
 
 class mainInterface(tk.Tk):
 
-  global matriz
+  global initial_matriz, matriz, rows, columns
 
-  matriz = np.array([
+  initial_matriz = np.array([
     [1, 1, 0, 0, 0, 0, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 1],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [3, 0, 0, 2, 2, 0, 0, 0],
     [0, 0, 0, 2, 2, 0, 0, 0],
-    [0, 0, 0, 0, 0, 4, 0, 0],
+    [0, 0, 0, 2, 2, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
     [1, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 0, 0, 0, 0, 1, 1]])
 
+  matriz = np.copy(initial_matriz)
+
+  # Número de filas y columnas en la matriz
+  rows, columns = matriz.shape
+  
   def __init__(self):
 
     super().__init__()
@@ -35,6 +40,7 @@ class mainInterface(tk.Tk):
     self.title("IA - Proyecto #2: Yoshi’s battle")
     self.resizable(True, True)
     self.image_dict = {}
+    self.ubicate_yoshis()
 
     # Crear el contenedor izquierdo
     self.left_frame = tk.Frame(self, padx=10, pady=10, bg="white")
@@ -88,12 +94,13 @@ class mainInterface(tk.Tk):
     self.select_movement_label.pack(pady="5", padx="10", fill="x")
 
     # Selector del próximo movimiento
-    movements_options = ["Seleccionar...", "Superior-Izquierdo", "Superior-Derecho", "Inferior-Izquierdo", "Inferior derecho"]
+    movements_options = ["Seleccionar...", "Superior - Izquierdo", "Superior - Derecho", "Inferior - Izquierdo", "Inferior - Derecho", "Derecho - Superior", "Derecho - Inferior", "Izquierdo - Inferior", "Izquierdo - Superior"]
     selected_movement = tk.StringVar(self.right_canvas)
     selected_movement.set(movements_options[0])
     movements_menu = tk.OptionMenu(self.right_canvas, selected_movement, *movements_options)
     movements_menu.config(font=('Helvetica', 11), bg="#8EEA6F", fg="black")
     movements_menu.pack(padx="10", fill="x")
+    movements_menu.config(state=tk.DISABLED)
 
     # Crear un frame para contener las puntuaciones
     self.score_frame = tk.Frame(self.right_canvas, bg="white")
@@ -104,13 +111,13 @@ class mainInterface(tk.Tk):
     self.score_label.config(bg="white")
     self.score_label.grid(row=0, column=0, pady=5, padx=0, sticky="w")
 
-    # Etiqueta de puntuación de la máquina
-    self.green_score_label = tk.Label(self.score_frame, text="Máquina", fg="#8EEA6F", font=("Helvetica", 12), anchor="w", justify="left")
+    # Etiqueta de puntuación Yoshi verde
+    self.green_score_label = tk.Label(self.score_frame, text="0", fg="#8EEA6F", font=("Helvetica", 12), anchor="w", justify="left")
     self.green_score_label.config(bg="white")
     self.green_score_label.grid(row=0, column=1, pady=0, padx=10, sticky="w")
 
-    # Etiqueta de puntuación del jugador
-    self.red_score_label = tk.Label(self.score_frame, text="Jugador", fg="red", font=("Helvetica", 12), anchor="w", justify="left")
+    # Etiqueta de puntuación Yoshi rojo
+    self.red_score_label = tk.Label(self.score_frame, text="0", fg="red", font=("Helvetica", 12), anchor="w", justify="left")
     self.red_score_label.config(bg="white")
     self.red_score_label.grid(row=0, column=2, pady=0, padx=10, sticky="w")
 
@@ -120,8 +127,14 @@ class mainInterface(tk.Tk):
 
     # Función del botón de inicio del algoritmo
     def start_algorithm():
-      # Bloquear el uso del selector de dificultad
-      selected_difficulty.trace_add("write", select_difficulty.config(state=tk.DISABLED))
+      if (selected_difficulty.get() != "Seleccionar..."):
+        # Bloquear el uso del botón de inicio
+        start_button.config(state=tk.DISABLED)
+        # Bloquear el uso del selector de dificultad
+        select_difficulty.config(state=tk.DISABLED)
+        # Activar el selector de movimiento
+        movements_menu.config(state=tk.ACTIVE)
+        play_button.config(state=tk.ACTIVE)
 
     # Botón para iniciar la partida
     start_button = tk.Button(self.buttons_frame, text="Iniciar", bg="#8EEA6F", fg="black", command=start_algorithm)
@@ -130,25 +143,62 @@ class mainInterface(tk.Tk):
 
     # Función para reiniciar la partida
     def restart():
-      selected_difficulty.trace_add("write", select_difficulty.config(state=tk.ACTIVE))
-
+      start_button.config(state=tk.ACTIVE)
+      select_difficulty.config(state=tk.ACTIVE)
+      movements_menu.config(state=tk.DISABLED)
+      selected_difficulty.set(difficulty_options[0])
+      selected_movement.set(movements_options[0])
+      play_button.config(state=tk.DISABLED)
+      self.red_score_label.config(text="0")
+      self.green_score_label.config(text="0")
+      app.ubicate_yoshis()
+      app.dibujar_matriz(None)
+    
     # Botón para reiniciar la partida
     restart_button = tk.Button(self.buttons_frame, text="Reiniciar", bg="#8EEA6F", fg="black", command=restart)
     restart_button.grid(row=0, column=1, sticky="ew", padx=5, pady=5)
     restart_button.config(font=('Helvetica', 12))
 
-    # Crear ventana con los créditos
+    # Función para jugar
+    def play():
+      #possible_movements("red", "") # Capturar orientación del movimiento
+      app.possible_movements("red", selected_movement.get())
+      selected_movement.set(movements_options[0])
+      app.dibujar_matriz(None)
+
+    # Botón jugar
+    play_button = tk.Button(self.buttons_frame, text="Jugar", bg="#8EEA6F", fg="black", command=play)
+    play_button.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
+    play_button.config(font=('Helvetica', 12), state=tk.DISABLED)
+
     def credits():
-      pass
+      # Crear ventana con los créditos
+      credits_window = tk.Toplevel(self)
+      credits_window.title("Proyecto #2: Yoshi´s battle - Inteligencia artificial")
+      credits_window.geometry(f"{round(windowWidth * 0.5)}x{round(windowHeight * 0.5)}+{x}+{y}")
+      credits_window.config(bg="#8EEA6F")
+      # Etiqueta para mostrar los créditos
+      credits_label = tk.Label(credits_window, text="HECHO POR:\n\nDIEGO FERNANDO VICTORIA - 202125877\nDIEGO.VICTORIA@CORREOUNIVALLE.EDU.CO\n\nJANIERT SEBASTIÁN SALAS - 201941265\nJANIERT.SALAS@CORREOUNIVALLE.EDU.CO\n\nJHON ALEXANDER VALENCIA - 202042426\nJHON.HILAMO@CORREOUNIVALLE.EDU.CO")
+      credits_label.config(font=('Helvetica', 11), bg="white", bd=3, relief="solid")
+      credits_label.place(relx=0.5, rely=0.5, anchor="center")
+      credits_window.transient(self)
+      credits_window.wait_window()
 
     # Botón de créditos
     credits_button = tk.Button(self.buttons_frame, text="Créditos", bg="#8EEA6F", fg="black", command=credits)
-    credits_button.grid(row=1, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
+    credits_button.grid(row=1, column=1, sticky="ew", padx=5, pady=5)
     credits_button.config(font=('Helvetica', 12))
 
     # Distribuir uniformemente el espacio en X entre los botones
     self.buttons_frame.columnconfigure(0, weight=1)
     self.buttons_frame.columnconfigure(1, weight=1)
+    
+    def on_arrow_key(event):
+      # print(f"Tecla presionada: {event.keysym}")
+      app.possible_movements("red", event.keysym)
+      app.dibujar_matriz(None)
+
+    self.bind("<Key>", on_arrow_key)
 
   # Cálculo de las dimensiones que tendrá la imagen principal de Yoshi
   def resize_first_image(self, image, size):
@@ -159,18 +209,109 @@ class mainInterface(tk.Tk):
     self.photo = self.resize_first_image(Image.open("resources/images/yoshigame.png"), (self.right_canvas.winfo_width(), round(self.right_canvas.winfo_height() * 0.4)))
     self.first_label.config(image=self.photo)
 
+  def ubicate_yoshis(self):
+    global matriz
+    matriz = np.copy(initial_matriz)
+
+    #First yoshi
+    zeros = np.argwhere(matriz == 0)
+    random_pos = zeros[np.random.choice(len(zeros))]
+    matriz[random_pos[0], random_pos[1]] = 3
+    #Second yoshi
+    zeros = np.delete(zeros, np.where((zeros == random_pos).all(axis=1)), axis=0)
+    random_pos = zeros[np.random.choice(len(zeros))]
+    matriz[random_pos[0], random_pos[1]] = 4
+
+  def check_coin(self, num, score): 
+    if (num == 1):
+      self.red_score_label.config(text=str(int(score) + 1))
+    elif (num == 2):
+      self.red_score_label.config(text=str(int(score) + 3))
+
+  def possible_movements(self, yoshi, orientation): # Coordenadas (Y, X)
+    green_position = np.where(matriz == 3)
+    red_position = np.where(matriz == 4)
+    green_coordinates = list(zip(green_position[0], green_position[1]))
+    red_coordinates = list(zip(red_position[0], red_position[1]))
+    green_y, green_x = green_coordinates[0]
+    red_y, red_x = red_coordinates[0]
+    #print(f"Posición de red: {red_position}")
+    #print(f"Valor Y: {red_y}")
+    #print(f"Valor X: {red_x}")
+    #print(f"Posiciones de green: {green_coordinates}")
+    #print(f"Valor Y: {green_y}")
+    #print(f"Valor X: {green_x}")
+    if (yoshi == "red"): 
+      # Se comprueba que sea posible el movimiento y que no esté el yoshi verde en la casilla...
+      
+      # Movimiento superior izquierdo
+      if (red_y - 2 >= 0 and red_x - 1 >= 0 and (red_y - 2, red_x - 1) != (green_y, green_x) and orientation == "Superior - Izquierdo"):
+        print("Sup-Izq")
+        app.check_coin(matriz[red_y - 2, red_x - 1], self.red_score_label.cget("text"))
+        # Agregar un muro donde había una moneda después que el Yoshi se va
+        matriz[red_y, red_x] = 0
+        matriz[red_y - 2, red_x - 1] = 4
+      
+      # Movimiento superior derecho
+      elif (red_y - 2 >= 0 and red_x + 1 <= (columns - 1) and (red_y - 2, red_x + 1) != (green_y, green_x) and orientation == "Superior - Derecho"):
+        print("Sup-Der")
+        app.check_coin(matriz[red_y - 2, red_x + 1], self.red_score_label.cget("text"))
+        matriz[red_y, red_x] = 0
+        matriz[red_y - 2, red_x + 1] = 4
+      
+      # Movimiento inferior derecho
+      elif (red_y + 2 <= (rows - 1) and red_x + 1 <= (columns - 1) and (red_y + 2, red_x + 1) != (green_y, green_x) and orientation == "Inferior - derecho"):
+        print("Inf-Der")
+        app.check_coin(matriz[red_y + 2, red_x + 1], self.red_score_label.cget("text"))
+        matriz[red_y, red_x] = 0
+        matriz[red_y + 2, red_x + 1] = 4
+      
+      # Movimiento inferior izquierdo
+      elif (red_y + 2 <= (rows - 1) and red_x - 1 >= 0 and (red_y + 2, red_x - 1) != (green_y, green_x) and orientation == "Inferior - Izquierdo"):
+        print("Inf-Izq")
+        app.check_coin(matriz[red_y + 2, red_x - 1], self.red_score_label.cget("text"))
+        matriz[red_y, red_x] = 0
+        matriz[red_y + 2, red_x - 1] = 4
+
+      # Movimiento derecho superior
+      elif (red_y - 1 >= 0 and red_x + 2 <= (columns - 1) and (red_y - 1, red_x + 2) != (green_y, green_x) and orientation == "Derecho - Superior"):
+        print("Der-Sup")
+        app.check_coin(matriz[red_y - 1, red_x + 2], self.red_score_label.cget("text"))
+        matriz[red_y, red_x] = 0
+        matriz[red_y - 1, red_x + 2] = 4
+      
+      # Movimiento derecho inferior
+      elif (red_y + 1 >= 0 and red_x + 2 <= (columns - 1) and (red_y + 1, red_x + 2) != (green_y, green_x) and orientation == "Derecho - Inferior"):
+        print("Der-Inf")
+        app.check_coin(matriz[red_y + 1, red_x + 2], self.red_score_label.cget("text"))
+        matriz[red_y, red_x] = 0
+        matriz[red_y + 1, red_x + 2] = 4
+      
+      # Movimiento izquierdo inferior
+      elif (red_y + 1 <= (rows - 1) and red_x - 2 >= 0 and (red_y + 1, red_x - 2) != (green_y, green_x) and orientation == "Izquierdo - Inferior"):
+        print("Izq-Inf")
+        app.check_coin(matriz[red_y + 1, red_x - 2], self.red_score_label.cget("text"))
+        matriz[red_y, red_x] = 0
+        matriz[red_y + 1, red_x - 2] = 4
+      
+      # Movimiento izquierdo superior
+      elif (red_y - 1 >= 0 and red_x - 2 >= 0 and (red_y - 1, red_x - 2) != (green_y, green_x) and orientation == "Izquierdo - Superior"):
+        print("Izq-Sup")
+        app.check_coin(matriz[red_y - 1, red_x - 2], self.red_score_label.cget("text"))
+        matriz[red_y, red_x] = 0
+        matriz[red_y - 1, red_x - 2] = 4
+    
+    else:
+      # Condiciones del yoshi verde
+      pass
+
   def dibujar_matriz(self, event):
 
     # Eliminar dibujos anteriores
     self.canvas_matriz.delete("all")
-    if hasattr(self, 'label_agent_icon') and self.label_agent_icon:self.label_agent_icon.destroy()
-    # Número de filas y columnas en la matriz
-    rows = 8
-    columns = 8
     # Tamaño de cada rectángulo en el Canvas
     rectangle_width = self.canvas_matriz.winfo_width() // columns
     rectangle_height = self.canvas_matriz.winfo_height() // rows
-
     for row in range(rows):
       for column in range(columns):
 
@@ -196,17 +337,8 @@ class mainInterface(tk.Tk):
           image_path = "resources/images/yoshi_Green.png"
         elif matriz[row][column] == 4: # Casilla con Yoshi rojo operado por el jugador
           image_path = "resources/images/yoshi_Red.png"
-        elif matriz[row][column] == 5: # Punto de inicio
-          image_path = "resources/images/fire_truck.png"
-          
-          if (x1 == 0 and y1 != 0): # Posición cuando X=0 y Y!=0
-            self.label_agent_icon.place(x = x1 + (rectangle_width * 0.15), y = y1 + round(y1 ** 0.35))
-          elif (x1 != 0 and y1 == 0): # Posición cuando X!=0 y Y=0
-            self.label_agent_icon.place(x = x1 + (rectangle_width * 0.15), y = y1 + round(rectangle_height ** 0.55))
-          elif (x1 == 0 and y1 == 0): # Posición cuando X=0 y Y=0
-            self.label_agent_icon.place(x=x1 + (rectangle_width * 0.15), y=y1 + round(rectangle_height ** 0.55))
-          else: # Posición en cualquier otro caso
-            self.label_agent_icon.place(x=x1 + round(x1 ** 0.35), y=y1 + round(y1 ** 0.35))
+        elif matriz[row][column] == 5: # Casilla inhabilitada
+          image_path = "resources/images/wall.png"
 
         # Dibujar rectángulos en el Canvas
         self.canvas_matriz.create_rectangle(x1, y1, x2, y2, fill=color, outline="black")
@@ -221,4 +353,4 @@ class mainInterface(tk.Tk):
 if __name__ == "__main__":
   app = mainInterface()
   app.mainloop()
-  os.system('cls') # Limpia la terminal
+  #os.system('cls') # Limpia la terminal
