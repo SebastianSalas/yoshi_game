@@ -18,20 +18,11 @@ class mainInterface(tk.Tk):
     [1, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 0, 0, 0, 0, 1, 1]])
 
-  matriz = initial_matriz
+  matriz = np.copy(initial_matriz)
 
   # Número de filas y columnas en la matriz
-  rows, columns = initial_matriz.shape
+  rows, columns = matriz.shape
   
-  #First yoshi
-  zeros = np.argwhere(matriz == 0)
-  random_pos = zeros[np.random.choice(len(zeros))]
-  matriz[random_pos[0], random_pos[1]] = 3
-  #Second yoshi
-  zeros = np.delete(zeros, np.where((zeros == random_pos).all(axis=1)), axis=0)
-  random_pos = zeros[np.random.choice(len(zeros))]
-  matriz[random_pos[0], random_pos[1]] = 4
-
   def __init__(self):
 
     super().__init__()
@@ -49,6 +40,7 @@ class mainInterface(tk.Tk):
     self.title("IA - Proyecto #2: Yoshi’s battle")
     self.resizable(True, True)
     self.image_dict = {}
+    self.ubicate_yoshis()
 
     # Crear el contenedor izquierdo
     self.left_frame = tk.Frame(self, padx=10, pady=10, bg="white")
@@ -119,12 +111,12 @@ class mainInterface(tk.Tk):
     self.score_label.config(bg="white")
     self.score_label.grid(row=0, column=0, pady=5, padx=0, sticky="w")
 
-    # Etiqueta de puntuación de la máquina
-    self.green_score_label = tk.Label(self.score_frame, text="Máquina", fg="#8EEA6F", font=("Helvetica", 12), anchor="w", justify="left")
+    # Etiqueta de puntuación Yoshi verde
+    self.green_score_label = tk.Label(self.score_frame, text="0", fg="#8EEA6F", font=("Helvetica", 12), anchor="w", justify="left")
     self.green_score_label.config(bg="white")
     self.green_score_label.grid(row=0, column=1, pady=0, padx=10, sticky="w")
 
-    # Etiqueta de puntuación del jugador
+    # Etiqueta de puntuación Yoshi rojo
     self.red_score_label = tk.Label(self.score_frame, text="0", fg="red", font=("Helvetica", 12), anchor="w", justify="left")
     self.red_score_label.config(bg="white")
     self.red_score_label.grid(row=0, column=2, pady=0, padx=10, sticky="w")
@@ -142,6 +134,7 @@ class mainInterface(tk.Tk):
         select_difficulty.config(state=tk.DISABLED)
         # Activar el selector de movimiento
         movements_menu.config(state=tk.ACTIVE)
+        play_button.config(state=tk.ACTIVE)
 
     # Botón para iniciar la partida
     start_button = tk.Button(self.buttons_frame, text="Iniciar", bg="#8EEA6F", fg="black", command=start_algorithm)
@@ -155,6 +148,11 @@ class mainInterface(tk.Tk):
       movements_menu.config(state=tk.DISABLED)
       selected_difficulty.set(difficulty_options[0])
       selected_movement.set(movements_options[0])
+      play_button.config(state=tk.DISABLED)
+      self.red_score_label.config(text="0")
+      self.green_score_label.config(text="0")
+      app.ubicate_yoshis()
+      app.dibujar_matriz(None)
     
     # Botón para reiniciar la partida
     restart_button = tk.Button(self.buttons_frame, text="Reiniciar", bg="#8EEA6F", fg="black", command=restart)
@@ -163,12 +161,14 @@ class mainInterface(tk.Tk):
 
     # Función para jugar
     def play():
-      possible_movements("red", "") # Capturar orientación del movimiento
+      #possible_movements("red", "") # Capturar orientación del movimiento
+      print("boton presionado")
+      selected_movement.set(movements_options[0])
 
     # Botón jugar
-    play_button = tk.Button(self.buttons_frame, text="Jugar", bg="#8EEA6F", fg="black", command=credits)
+    play_button = tk.Button(self.buttons_frame, text="Jugar", bg="#8EEA6F", fg="black", command=play)
     play_button.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
-    play_button.config(font=('Helvetica', 12))
+    play_button.config(font=('Helvetica', 12), state=tk.DISABLED)
 
     # Crear ventana con los créditos
     def credits():
@@ -283,6 +283,19 @@ class mainInterface(tk.Tk):
   def right_canvas_resize(self, event):
     self.photo = self.resize_first_image(Image.open("resources/images/yoshigame.png"), (self.right_canvas.winfo_width(), round(self.right_canvas.winfo_height() * 0.4)))
     self.first_label.config(image=self.photo)
+
+  def ubicate_yoshis(self):
+    global matriz
+    matriz = np.copy(initial_matriz)
+
+    #First yoshi
+    zeros = np.argwhere(matriz == 0)
+    random_pos = zeros[np.random.choice(len(zeros))]
+    matriz[random_pos[0], random_pos[1]] = 3
+    #Second yoshi
+    zeros = np.delete(zeros, np.where((zeros == random_pos).all(axis=1)), axis=0)
+    random_pos = zeros[np.random.choice(len(zeros))]
+    matriz[random_pos[0], random_pos[1]] = 4
 
   def dibujar_matriz(self, event):
 
