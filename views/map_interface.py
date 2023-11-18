@@ -172,7 +172,17 @@ class mainInterface(tk.Tk):
 
     # Crear ventana con los créditos
     def credits():
-      pass
+      credits_window = tk.Toplevel(self)
+      credits_window.title("Proyecto #2: Yoshi´s battle - Inteligencia artificial")
+      credits_window.geometry(f"{round(windowWidth * 0.5)}x{round(windowHeight * 0.5)}+{x}+{y}")
+      credits_window.config(bg="#8EEA6F")
+
+      # Etiqueta para mostrar los créditos
+      credits_label = tk.Label(credits_window, text="HECHO POR:\n\nDIEGO FERNANDO VICTORIA - 202125877\nDIEGO.VICTORIA@CORREOUNIVALLE.EDU.CO\n\nJANIERT SEBASTIÁN SALAS - 201941265\nJANIERT.SALAS@CORREOUNIVALLE.EDU.CO\n\nJHON ALEXANDER VALENCIA - 202042426\nJHON.HILAMO@CORREOUNIVALLE.EDU.CO")
+      credits_label.config(font=('Helvetica', 10), bg="white", bd=3, relief="solid")
+      credits_label.place(relx=0.5, rely=0.5, anchor="center")
+      credits_window.transient(self)
+      credits_window.wait_window()
 
     # Botón de créditos
     credits_button = tk.Button(self.buttons_frame, text="Créditos", bg="#8EEA6F", fg="black", command=credits)
