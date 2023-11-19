@@ -24,7 +24,7 @@ class mainInterface(tk.Tk):
   # Número de filas y columnas en la matriz
   rows, columns = matriz.shape
   
-  def __init__(self):
+  def __init__(self): # Función que crea la ventana principal
 
     super().__init__()
 
@@ -56,7 +56,6 @@ class mainInterface(tk.Tk):
     # Canvas para representar la matríz en el contenedor izquierdo
     self.canvas_matriz = tk.Canvas(self.left_frame, bg="white", bd=2, relief="solid", highlightbackground="#8EEA6F")
     self.canvas_matriz.pack(expand=True, fill="both")
-    # Configurar evento de clic en el Canvas
     self.canvas_matriz.bind("<Button-1>", self.matriz_click)
     self.canvas_matriz.bind("<Configure>", self.dibujar_matriz)
 
@@ -142,8 +141,7 @@ class mainInterface(tk.Tk):
     restart_button.grid(row=0, column=1, sticky="ew", padx=5, pady=5)
     restart_button.config(font=('Helvetica', 12))
 
-    def credits():
-      # Crear ventana con los créditos
+    def credits(): # Función que crea ventana con los créditos
       credits_window = tk.Toplevel(self)
       credits_window.title("Proyecto #2: Yoshi´s battle - Inteligencia artificial")
       credits_window.geometry(f"{round(windowWidth * 0.5)}x{round(windowHeight * 0.5)}+{x}+{y}")
@@ -164,61 +162,14 @@ class mainInterface(tk.Tk):
     self.buttons_frame.columnconfigure(0, weight=1)
     self.buttons_frame.columnconfigure(1, weight=1)
     
-  # Cálculo de las dimensiones que tendrá la imagen principal de Yoshi
-  def resize_first_image(self, image, size):
+  def resize_first_image(self, image, size): # Cálculo de las dimensiones que tendrá la imagen principal de Yoshi
     return ImageTk.PhotoImage(image.resize(size, Image.LANCZOS))
   
-  # Manejar el evento de redimensionar el Canvas derecho y la imagen
-  def right_canvas_resize(self, event):
+  def right_canvas_resize(self, event): # Manejar el evento de redimensionar el Canvas derecho y la imagen
     self.photo = self.resize_first_image(Image.open("resources/images/yoshigame.png"), (self.right_canvas.winfo_width(), round(self.right_canvas.winfo_height() * 0.4)))
     self.first_label.config(image=self.photo)
 
-  # Manejar evento de clic en el Canvas
-  def matriz_click(self, event):
-    global matriz, movements_matriz
-    # Obtener la posición del clic
-    mouse_x, mouse_y = event.x, event.y
-    # Tamaño de cada rectángulo en el Canvas
-    rectangle_width, rectangle_height = self.canvas_matriz.winfo_width() // columns, self.canvas_matriz.winfo_height() // rows
-    # Calcular la fila y columna del clic
-    click_row, click_column = mouse_y // rectangle_height, mouse_x // rectangle_width
-    # Obtener las coordenadas actuales del Yoshi rojo
-    red_position = np.where(matriz == 4)
-    red_coordinates = list(zip(red_position[0], red_position[1]))
-    red_y, red_x = red_coordinates[0]
-    
-    
-
-    # Realizar acciones según la fila y columna clicada
-    if (matriz[click_row, click_column] == 4): # Comprobar que haya iniciado el juego
-      
-      app.possible_movements("red")
-
-      # Establecer la posición actual del Yoshi como cero en la matriz
-      #print(f"Matriz en [{click_row}, {click_column}] = {movements_matriz[click_row, click_column]}")
-    
-    #print(f"Movements matriz in [{click_row}, {click_column}] = {movements_matriz[click_row, click_column]}")
-    if (movements_matriz[click_row, click_column] == 6):
-      matriz[red_y, red_x] = 0
-      if (matriz[click_row, click_column] in [1, 2]):
-        self.check_coin(matriz[click_row, click_column], self.red_score_label.cget("text"))
-      movements_matriz = np.copy(initial_matriz)
-      matriz[click_row, click_column] = 4
-      if (initial_matriz[red_y, red_x] in [1, 2] and matriz[red_y, red_x] != 4):
-        matriz[red_y, red_x] = 5
-        
-
-    print(f"Click en [{click_row}, {click_column}] = {matriz[click_row, click_column]}")
-    
-    app.dibujar_matriz(None)
-  
-  def check_coin(self, coin, score): 
-    if (coin == 1):
-      self.red_score_label.config(text=str(int(score) + 1))
-    elif (coin == 2):
-      self.red_score_label.config(text=str(int(score) + 3))
-
-  def ubicate_yoshis(self):
+  def ubicate_yoshis(self): # Genera posiciones aleatorias en el mapa para ubicar ambos yoshi's
     global matriz
     matriz = np.copy(initial_matriz)
     # Yoshi verde 
@@ -230,6 +181,31 @@ class mainInterface(tk.Tk):
     random_pos = zeros[np.random.choice(len(zeros))]
     matriz[random_pos[0], random_pos[1]] = 4
 
+  def matriz_click(self, event): # Manejar evento de clic en el Canvas izquierdo
+    global matriz, movements_matriz
+    # Obtener la posición del clic
+    mouse_x, mouse_y = event.x, event.y
+    # Tamaño de cada rectángulo en el Canvas
+    rectangle_width, rectangle_height = self.canvas_matriz.winfo_width() // columns, self.canvas_matriz.winfo_height() // rows
+    # Calcular la fila y columna del clic
+    click_row, click_column = mouse_y // rectangle_height, mouse_x // rectangle_width
+    # Obtener las coordenadas actuales del Yoshi rojo
+    red_position = np.where(matriz == 4)
+    red_coordinates = list(zip(red_position[0], red_position[1]))
+    red_y, red_x = red_coordinates[0]
+
+    if (matriz[click_row, click_column] == 4): # Comprobar que haya iniciado el juego desde el botón de inicio
+      app.possible_movements("red")
+    if (movements_matriz[click_row, click_column] == 6): # Comprobar que haya iniciado el juego desde el botón de inicio
+      matriz[red_y, red_x] = 0
+      if (matriz[click_row, click_column] in [1, 2]):
+        self.check_coin("red", matriz[click_row, click_column], self.red_score_label.cget("text"))
+      movements_matriz = np.copy(initial_matriz)
+      matriz[click_row, click_column] = 4
+      self.leaving_coin(red_y, red_x)
+    
+    app.dibujar_matriz(None)
+
   def possible_movements(self, yoshi): # Coordenadas (Y, X)
     global matriz, movements_matriz
     green_position, red_position = np.where(matriz == 3), np.where(matriz == 4)
@@ -237,37 +213,34 @@ class mainInterface(tk.Tk):
     yoshi_coordinates = {"red": red_coordinates[0], "green": green_coordinates[0]}
     yoshi_y, yoshi_x = yoshi_coordinates[yoshi]
     
-    def leaving_coin():
-      #print(f"Matriz inicial en [{yoshi_y},{yoshi_x}] = {initial_matriz[yoshi_y, yoshi_x]}")
-      #print(f"Matriz actual en [{yoshi_y},{yoshi_x}] = {matriz[yoshi_y, yoshi_x]}")
-      if ((initial_matriz[yoshi_y, yoshi_x] in [1, 2]) and matriz[yoshi_y, yoshi_x] != 4):
-        matriz[yoshi_y, yoshi_x] = 5
-        app.dibujar_matriz(None)
+    movements = [ # Posibles direcciones de movimiento
+      (-2, -1), (-2, 1), # Movimiento superior izquierdo y derecho
+      (2, 1), (2, -1), # Movimiento inferior derecho e izquierdo
+      (-1, 2), (1, 2), # Movimiento derecho superior e inferior
+      (1, -2), (-1, -2)] # Movimiento izquierdo inferior y superior
 
-    # Se comprueba que sea posible el movimiento y que no esté el yoshi verde en la casilla...
-      
-    # Posibles direcciones de movimiento
-    movements = [
-      (-2, -1), (-2, 1),  # Movimiento superior izquierdo y derecho
-      (2, 1), (2, -1),   # Movimiento inferior derecho e izquierdo
-      (-1, 2), (1, 2),   # Movimiento derecho superior e inferior
-      (1, -2), (-1, -2)]  # Movimiento izquierdo inferior y superior
-    next_y, next_x = 0, 0
-    for dy, dx in movements:
+    for dy, dx in movements: # Se comprueba que sea posible el movimiento y que no esté el otro yoshi en la casilla...
       next_y, next_x = yoshi_y + dy, yoshi_x + dx
-      # Verificar límites y obstáculos
-      if 0 <= next_y < rows and 0 <= next_x < columns and matriz[next_y, next_x] not in [3, 4, 5]:
+      if 0 <= next_y < rows and 0 <= next_x < columns and matriz[next_y, next_x] not in [3, 4, 5]: # Verificar límites y obstáculos
         movements_matriz[next_y, next_x] = 6
+
+  def check_coin(self, yoshi, value, score): # Comprueba si un yoshi está sobre una moneda
+    score_label = self.red_score_label if yoshi == "red" else self.green_score_label
+    if value == 1: # Moneda normal
+        new_score = int(score) + 1
+    elif value == 2: # Moneda especial
+        new_score = int(score) + 3
+    score_label.config(text=str(new_score))
     
-    #leaving_coin()
+  def leaving_coin(self, yoshi_y, yoshi_x): # Comprueba si un yoshi deja una casilla donde había una moneda
+    if (initial_matriz[yoshi_y, yoshi_x] in [1, 2] and matriz[yoshi_y, yoshi_x] not in [3, 4]):
+      matriz[yoshi_y, yoshi_x] = 5
 
   def dibujar_matriz(self, event):
-
     # Eliminar dibujos anteriores
     self.canvas_matriz.delete("all")
     # Tamaño de cada rectángulo en el Canvas
-    rectangle_width = self.canvas_matriz.winfo_width() // columns
-    rectangle_height = self.canvas_matriz.winfo_height() // rows
+    rectangle_width, rectangle_height = self.canvas_matriz.winfo_width() // columns, self.canvas_matriz.winfo_height() // rows
 
     for row in range(rows):
       for column in range(columns):
@@ -279,41 +252,34 @@ class mainInterface(tk.Tk):
         y2 = y1 + rectangle_height # Esquina inferior derecha
         x_center, y_center = (x1 + x2) // 2, (y1 + y2) // 2
 
-        # Color y texto para el rectángulo
-        color = "white"
-        color_border = "black"
-        border = 1
-        image_path = None
+        # Color, texto, borde e imagen para el rectángulo
+        color, color_border, border, image_path = "white", "black", 1, None
+
         if matriz[row][column] == 0: # Casilla libre
           pass
         elif matriz[row][column] == 1: # Casilla con estrella simple
-          color = "#4F80BD"
-          image_path = "resources/images/basic_Coin.gif"
+          color, image_path = "#4F80BD", "resources/images/basic_Coin.gif"
         elif matriz[row][column] == 2: # Casilla con estrella especial
-          color = "#4F80BD"
-          image_path = "resources/images/star_Coin.gif"
+          color, image_path = "#4F80BD","resources/images/star_Coin.gif"
         elif matriz[row][column] == 3: # Casilla con Yoshi verde operado por el computador
           image_path = "resources/images/yoshi_Green.png"
         elif matriz[row][column] == 4: # Casilla con Yoshi rojo operado por el jugador
           image_path = "resources/images/yoshi_Red.png"
         elif matriz[row][column] == 5: # Casilla inhabilitada
           image_path = "resources/images/wall.png"
-        
         if movements_matriz[row][column] == 6: # Casilla disponible para movimiento
-          color_border = "#8B0000"
-          border = 5
+          color_border, border = "#8B0000", 5
        
         # Dibujar rectángulos en el Canvas
         self.canvas_matriz.create_rectangle(x1, y1, x2, y2, fill=color, outline=color_border, width=border)
 
-        if image_path:
-          unique_id = str(uuid.uuid4())  # Generar un identificador único
+        if image_path: # Se agrega imagen a los rectángulos que requieran
+          unique_id = str(uuid.uuid4())  # Generar un identificador único para el rectángulo
           image = ImageTk.PhotoImage(Image.open(image_path).resize((round(rectangle_width * 0.9), round(rectangle_height * 0.9)), Image.LANCZOS))
           self.image_dict[unique_id] = image  # Almacenar la imagen en el diccionario
           self.canvas_matriz.create_image(x_center, y_center, anchor=tk.CENTER, image=image)
 
-# Método principal
-if __name__ == "__main__":
+if __name__ == "__main__": # Método principal
   app = mainInterface()
   app.mainloop()
   #os.system('cls') # Limpia la terminal
