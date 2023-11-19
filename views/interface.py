@@ -127,11 +127,13 @@ class mainInterface(tk.Tk):
     start_button.config(font=('Helvetica', 12))
 
     def restart(): # Función para reiniciar la partida
+      global movements_matriz
       start_button.config(state=tk.ACTIVE)
       select_difficulty.config(state=tk.ACTIVE)
       selected_difficulty.set(difficulty_options[0])
       self.red_score_label.config(text="0")
       self.green_score_label.config(text="0")
+      movements_matriz = np.copy(initial_matriz)
       app.ubicate_yoshis()
       app.dibujar_matriz(None)
     
@@ -185,22 +187,31 @@ class mainInterface(tk.Tk):
     red_coordinates = list(zip(red_position[0], red_position[1]))
     red_y, red_x = red_coordinates[0]
     
+    def check_coin(coin, score): 
+      if (coin == 1):
+        self.red_score_label.config(text=str(int(score) + 1))
+      elif (coin == 2):
+        self.red_score_label.config(text=str(int(score) + 3))
+
     # Realizar acciones según la fila y columna clicada
     if (matriz[click_row, click_column] == 4): # Comprobar que haya iniciado el juego
       
       app.possible_movements("red")
 
       # Establecer la posición actual del Yoshi como cero en la matriz
-      print(f"Matriz en [{click_row}, {click_column}] = {movements_matriz[click_row, click_column]}")
+      #print(f"Matriz en [{click_row}, {click_column}] = {movements_matriz[click_row, click_column]}")
     
-    print(f"Movements matriz in [{click_row}, {click_column}] = {movements_matriz[click_row, click_column]}")
+    #print(f"Movements matriz in [{click_row}, {click_column}] = {movements_matriz[click_row, click_column]}")
     if (movements_matriz[click_row, click_column] == 6):
-      print("Movement ok")
       matriz[red_y, red_x] = 0
+      if (matriz[click_row, click_column] in [1, 2]):
+        check_coin(matriz[click_row, click_column], self.red_score_label.cget("text"))
       movements_matriz = np.copy(initial_matriz)
       matriz[click_row, click_column] = 4
+      
+        
 
-    print(f"Clic en [{click_row}, {click_column}]")
+    print(f"Click en [{click_row}, {click_column}] = {matriz[click_row, click_column]}")
     
     app.dibujar_matriz(None)
   
@@ -218,17 +229,10 @@ class mainInterface(tk.Tk):
 
   def possible_movements(self, yoshi): # Coordenadas (Y, X)
     global matriz, movements_matriz
-    green_position = np.where(matriz == 3)
-    green_coordinates = list(zip(green_position[0], green_position[1]))
-    green_y, green_x = green_coordinates[0]
-    red_position = np.where(matriz == 4)
-    red_coordinates = list(zip(red_position[0], red_position[1]))
-    red_y, red_x = red_coordinates[0]
-    yoshi_x, yoshi_y = 0, 0
-    if (yoshi == "red"):
-      yoshi_y, yoshi_x = red_coordinates[0]
-    elif (yoshi == "green"):
-      yoshi_y, yoshi_x = green_coordinates[0]
+    green_position, red_position = np.where(matriz == 3), np.where(matriz == 4)
+    green_coordinates, red_coordinates = list(zip(green_position[0], green_position[1])), list(zip(red_position[0], red_position[1]))
+    yoshi_coordinates = {"red": red_coordinates[0], "green": green_coordinates[0]}
+    yoshi_y, yoshi_x = yoshi_coordinates[yoshi]
     
     def leaving_coin():
       print(f"Matriz inicial en [{yoshi_y},{yoshi_x}] = {initial_matriz[yoshi_y, yoshi_x]}")
@@ -251,14 +255,13 @@ class mainInterface(tk.Tk):
       (2, 1), (2, -1),   # Movimiento inferior derecho e izquierdo
       (-1, 2), (1, 2),   # Movimiento derecho superior e inferior
       (1, -2), (-1, -2)]  # Movimiento izquierdo inferior y superior
-    
+    next_y, next_x = 0, 0
     for dy, dx in movements:
       next_y, next_x = yoshi_y + dy, yoshi_x + dx
       # Verificar límites y obstáculos
       if 0 <= next_y < rows and 0 <= next_x < columns and matriz[next_y, next_x] not in [3, 4, 5]:
-        #check_coin(matriz[red_y, red_x], self.red_score_label.cget("text"))
         movements_matriz[next_y, next_x] = 6
-
+    
     #leaving_coin()
 
   def dibujar_matriz(self, event):
