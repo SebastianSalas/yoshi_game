@@ -187,11 +187,7 @@ class mainInterface(tk.Tk):
     red_coordinates = list(zip(red_position[0], red_position[1]))
     red_y, red_x = red_coordinates[0]
     
-    def check_coin(coin, score): 
-      if (coin == 1):
-        self.red_score_label.config(text=str(int(score) + 1))
-      elif (coin == 2):
-        self.red_score_label.config(text=str(int(score) + 3))
+    
 
     # Realizar acciones según la fila y columna clicada
     if (matriz[click_row, click_column] == 4): # Comprobar que haya iniciado el juego
@@ -205,16 +201,23 @@ class mainInterface(tk.Tk):
     if (movements_matriz[click_row, click_column] == 6):
       matriz[red_y, red_x] = 0
       if (matriz[click_row, click_column] in [1, 2]):
-        check_coin(matriz[click_row, click_column], self.red_score_label.cget("text"))
+        self.check_coin(matriz[click_row, click_column], self.red_score_label.cget("text"))
       movements_matriz = np.copy(initial_matriz)
       matriz[click_row, click_column] = 4
-      
+      if (initial_matriz[red_y, red_x] in [1, 2] and matriz[red_y, red_x] != 4):
+        matriz[red_y, red_x] = 5
         
 
     print(f"Click en [{click_row}, {click_column}] = {matriz[click_row, click_column]}")
     
     app.dibujar_matriz(None)
   
+  def check_coin(self, coin, score): 
+    if (coin == 1):
+      self.red_score_label.config(text=str(int(score) + 1))
+    elif (coin == 2):
+      self.red_score_label.config(text=str(int(score) + 3))
+
   def ubicate_yoshis(self):
     global matriz
     matriz = np.copy(initial_matriz)
@@ -235,17 +238,11 @@ class mainInterface(tk.Tk):
     yoshi_y, yoshi_x = yoshi_coordinates[yoshi]
     
     def leaving_coin():
-      print(f"Matriz inicial en [{yoshi_y},{yoshi_x}] = {initial_matriz[yoshi_y, yoshi_x]}")
-      print(f"Matriz actual en [{yoshi_y},{yoshi_x}] = {matriz[yoshi_y, yoshi_x]}")
+      #print(f"Matriz inicial en [{yoshi_y},{yoshi_x}] = {initial_matriz[yoshi_y, yoshi_x]}")
+      #print(f"Matriz actual en [{yoshi_y},{yoshi_x}] = {matriz[yoshi_y, yoshi_x]}")
       if ((initial_matriz[yoshi_y, yoshi_x] in [1, 2]) and matriz[yoshi_y, yoshi_x] != 4):
         matriz[yoshi_y, yoshi_x] = 5
         app.dibujar_matriz(None)
-
-    def check_coin(coin, score): 
-      if (coin == 1):
-        self.red_score_label.config(text=str(int(score) + 1))
-      elif (coin == 2):
-        self.red_score_label.config(text=str(int(score) + 3))
 
     # Se comprueba que sea posible el movimiento y que no esté el yoshi verde en la casilla...
       
