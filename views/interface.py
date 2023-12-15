@@ -3,6 +3,7 @@ import tkinter as tk
 import numpy as np
 import uuid
 from PIL import Image, ImageTk
+from minimax import *
 
 class mainInterface(tk.Tk):
 
@@ -42,6 +43,8 @@ class mainInterface(tk.Tk):
     self.resizable(True, True)
     self.image_dict = {}
     self.ubicate_yoshis()
+
+    self.turno_yoshi_verde = True
 
     # Crear el contenedor izquierdo
     self.left_frame = tk.Frame(self, padx=10, pady=10, bg="white")
@@ -115,19 +118,20 @@ class mainInterface(tk.Tk):
     def start_algorithm(): # Función del botón de inicio
       if (selected_difficulty.get() != "Seleccionar..."):
         # Bloquear el uso del botón de inicio
-        start_button.config(state=tk.DISABLED)
+        self.start_button.config(state=tk.DISABLED)
         # Bloquear el uso del selector de dificultad
         select_difficulty.config(state=tk.DISABLED)
         # Llamar a la jugada de Yoshi verde
+        self.green_yoshi_turn()
 
     # Botón para iniciar la partida
-    start_button = tk.Button(self.buttons_frame, text="Iniciar", bg="#8EEA6F", fg="black", command=start_algorithm)
-    start_button.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
-    start_button.config(font=('Helvetica', 12))
+    self.start_button = tk.Button(self.buttons_frame, text="Iniciar", bg="#8EEA6F", fg="black", command=start_algorithm)
+    self.start_button.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
+    self.start_button.config(font=('Helvetica', 12))
 
     def restart(): # Función para reiniciar la partida
       global movements_matriz
-      start_button.config(state=tk.ACTIVE)
+      self.start_button.config(state=tk.ACTIVE)
       select_difficulty.config(state=tk.ACTIVE)
       selected_difficulty.set(difficulty_options[0])
       self.red_score_label.config(text="0")
@@ -181,6 +185,21 @@ class mainInterface(tk.Tk):
     random_pos = zeros[np.random.choice(len(zeros))]
     matriz[random_pos[0], random_pos[1]] = 4
 
+  def green_yoshi_turn(self):
+    global matriz, movements_matriz
+    green_position, red_position = np.where(matriz == 3), np.where(matriz == 4)
+    green_coordinates, red_coordinates = list(zip(green_position[0], green_position[1])), list(zip(red_position[0], red_position[1]))
+    gameminimax = Juego(green_coordinates[0], red_coordinates[0], [(row, column) for row, values in enumerate(matriz) for column, value in enumerate(values) if value in [1, 2]], self.green_score_label.cget("text"), self.red_score_label.cget("text"))
+    # Actualizar la matriz y las coordenadas del Yoshi verde
+    yoshi_y, yoshi_x = green_coordinates[0]
+    matriz[yoshi_y, yoshi_x] = 0
+    green_y, green_x = minimax(gameminimax, 4)
+    self.check_coin("green", matriz[green_y, green_x], self.green_score_label.cget("text"))
+    matriz[green_y, green_x] = 3
+    # Actualizar la interfaz gráfica
+    self.dibujar_matriz(None)
+    
+
   def matriz_click(self, event): # Manejar evento de clic en el Canvas izquierdo
     global matriz, movements_matriz
     # Obtener la posición del clic
@@ -193,16 +212,18 @@ class mainInterface(tk.Tk):
     red_position = np.where(matriz == 4)
     red_coordinates = list(zip(red_position[0], red_position[1]))
     red_y, red_x = red_coordinates[0]
-
-    if (matriz[click_row, click_column] == 4): # Comprobar que haya iniciado el juego desde el botón de inicio
-      app.possible_movements("red")
-    if (movements_matriz[click_row, click_column] == 6): # Comprobar que haya iniciado el juego desde el botón de inicio
-      matriz[red_y, red_x] = 0
-      if (matriz[click_row, click_column] in [1, 2]):
-        self.check_coin("red", matriz[click_row, click_column], self.red_score_label.cget("text"))
-      movements_matriz = np.copy(initial_matriz)
-      matriz[click_row, click_column] = 4
-      self.leaving_coin(red_y, red_x)
+    
+    if hasattr(self, 'start_button') and self.start_button.cget("state") == "disabled": # Comprueba que se haya iniciado el juego
+      if (matriz[click_row, click_column] == 4): # Comprueba que se haya hecho click en el Yoshi rojo
+        app.possible_movements("red")
+      if (movements_matriz[click_row, click_column] == 6): # Comprueba si hay una casillas disponibles
+        matriz[red_y, red_x] = 0
+        if (matriz[click_row, click_column] in [1, 2]): # Comprueba si se toma una moneda
+          self.check_coin("red", matriz[click_row, click_column], self.red_score_label.cget("text"))
+        movements_matriz = np.copy(initial_matriz)
+        matriz[click_row, click_column] = 4
+        self.leaving_coin(red_y, red_x)
+        self.green_yoshi_turn()
     
     app.dibujar_matriz(None)
 
@@ -226,11 +247,7 @@ class mainInterface(tk.Tk):
 
   def check_coin(self, yoshi, value, score): # Comprueba si un yoshi está sobre una moneda
     score_label = self.red_score_label if yoshi == "red" else self.green_score_label
-    if value == 1: # Moneda normal
-        new_score = int(score) + 1
-    elif value == 2: # Moneda especial
-        new_score = int(score) + 3
-    score_label.config(text=str(new_score))
+    score_label.config(text=str(int(score) + 1 if value == 1 else int(score) + 3 if value == 2 else int(score)))
     
   def leaving_coin(self, yoshi_y, yoshi_x): # Comprueba si un yoshi deja una casilla donde había una moneda
     if (initial_matriz[yoshi_y, yoshi_x] in [1, 2] and matriz[yoshi_y, yoshi_x] not in [3, 4]):
